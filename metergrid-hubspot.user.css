@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           HubSpot – metergrid CI/CD
 @namespace      metergrid.de
-@version        2.0.0
+@version        3.0.0
 @description    Reskin des HubSpot-Portals im Corporate Design des metergrid Mieterstromportals.
 @author         claude@23r.de
 @preprocessor   default
@@ -15,27 +15,34 @@
      unten unter @-moz-document ergänzen.
 
   Farbherkunft: Werte per Pixel-Sampling aus den metergrid-Portal-
-  Screenshots extrahiert (input/Screenshot ... 11.35.36.png), reihenweise
-  gescannt statt an Einzelpunkten geraten.
+  Screenshots extrahiert (input/Screenshot ... 11.35.36.png) sowie aus
+  Referenz-Screenshots eines älteren HubSpot-Designs, das als angenehmer
+  empfunden wurde. Beide Quellen reihenweise gescannt statt geraten.
 
-  WICHTIGE ERKENNTNIS aus dem Sampling (v2 gegenüber v1 korrigiert):
-  Im metergrid-Portal ist NUR das obere Logo/Such-Band der linken Spalte
-  Navy (#002c96). Die eigentliche Nav-Liste darunter ist WEISS, mit
-  grauem Text für inaktive Einträge und einer blauen Pille (#005edf)
-  nur für den aktiven Eintrag. v1 hatte fälschlich die GESAMTE Sidebar
-  navy + Linktext blau gesetzt -> das ergab (wo die Navy-Regel nicht
-  griff) blaue Schrift auf HubSpots dunkelgrauem Standard-Hintergrund =
-  schlechter Kontrast. Diese Version bildet die echte Struktur ab:
+  DESIGNENTSCHEIDUNG v3 (gegenüber v2 korrigiert):
+  Das als "alt/angenehm" empfundene HubSpot-Design nutzt EIN durchgehendes
+  weiches Blaugrau (#394651) für Top-Bar UND komplette linke Icon-Rail als
+  eine Fläche - nicht HubSpots aktuelles hartes Schwarz. v2 hatte (aus der
+  metergrid-Website 1:1 übernommen) die Rail auf Weiß mit grauem Text
+  umgestellt. v3 übernimmt stattdessen die STRUKTUR des alten Designs
+  (durchgehende dunkle Fläche über Top-Bar + Rail) und ersetzt den Ton
+  durch metergrid-Navy (#002c96) statt Blaugrau/Schwarz:
 
-    HubSpot Top-Bar (volle Breite, oben)   -> Navy  (= metergrid Logo-Band)
-    HubSpot Icon-Rail (links, CRM/Sales/…) -> Weiß  (= metergrid Nav-Liste)
-      - inaktiv: grauer Text/Icon
-      - aktiv:   blaue Pille, weißer Text
+    HubSpot Top-Bar + Icon-Rail (eine Fläche) -> durchgehend Navy
+      - inaktive Einträge: helle, aber gedämpfte Schrift/Icons (kein Blau!)
+      - aktiver Eintrag:   blaue Pille (#005edf), weißer Text
+
+  Der v1-Kontrastfehler (blaue Schrift auf dunkelgrauem Hintergrund, weil
+  die Navy-Regel nur teilweise griff) wird hier strukturell vermieden:
+  Text in der Rail ist immer HELL (nie die Linkfarbe #005edf), und der
+  Navy-Hintergrund wird über mehrere redundante Selektoren erzwungen statt
+  über einen einzigen unsicheren Treffer.
 
   HubSpot rendert Teile der Navigation mit dynamisch gehashten Klassen-
   namen. Selektoren setzen primär auf ARIA-Rollen/Landmarks + Tags
-  (stabiler) plus bekannte HubSpot-Klassen als Fallback. Abschnitte mit
-  "// PRÜFEN" ggf. per DevTools nachjustieren.
+  (stabiler) plus bekannte HubSpot-Klassen als Fallback. Falls ein
+  Element nicht greift, per DevTools (Rechtsklick -> Untersuchen) den
+  echten Klassennamen ablesen und ergänzen.
 */
 
 @-moz-document regexp("https://(app|app-eu1|app-na1|app-na2)[a-z0-9-]*\.hubspot\.com/.*") {
@@ -49,29 +56,48 @@
     --mg-bg: #f7f9fc;         /* Seiten-Hintergrund (Content-Bereich) */
     --mg-bg-soft: #fcfdfe;    /* Karten-Hintergrund (fast weiß) */
     --mg-border: #e2e8f0;     /* Kartenränder */
-    --mg-gray-icon: #8998a4;  /* inaktives Icon in der Nav-Liste */
-    --mg-gray-text: #5d7182;  /* inaktiver Text in der Nav-Liste */
+    --mg-rail-text: #c9d4e8;  /* inaktive Schrift/Icons in der Rail (hell, NIE Blau) */
     --mg-white: #ffffff;
   }
 
   /* =========================================================
-     1. TOP-BAR (volle Breite, oben) -> Navy, helle Schrift/Icons
+     1. TOP-BAR + LINKE ICON-RAIL (CRM/Marketing/Sales/…)
+     -> eine durchgehende Navy-Fläche, wie im "alten" HubSpot-Design
+     (dort #394651 Blaugrau statt Schwarz), nur eben in metergrid-Navy.
+     Mehrere redundante Selektoren, damit der Hintergrund sicher greift.
      ========================================================= */
   header,
   header[role="banner"],
   .private-topbar,
-  #hs-nav-header {
+  #hs-nav-header,
+  nav[aria-label*="Primary" i],
+  nav[aria-label*="Main" i],
+  [role="navigation"][aria-label*="Primary" i],
+  .private-nav,
+  .private-nav__primary-nav,
+  #navAppContainer,
+  aside,
+  [class*="sidebar" i],
+  [class*="topbar" i] {
     background: var(--mg-navy) !important;
     background-color: var(--mg-navy) !important;
   }
-  header, header * ,
+
+  /* Schrift/Icons in der Chrome: immer HELL, nie die Link-Blaufarbe -
+     das war der v1-Kontrastfehler (blaue Schrift auf dunklem Grund). */
+  header, header *,
   header[role="banner"], header[role="banner"] *,
-  .private-topbar, .private-topbar * {
-    color: var(--mg-white) !important;
+  .private-topbar, .private-topbar *,
+  nav[aria-label*="Primary" i], nav[aria-label*="Primary" i] *,
+  .private-nav, .private-nav *,
+  aside, aside * {
+    color: var(--mg-rail-text) !important;
   }
-  header svg, header[role="banner"] svg, .private-topbar svg {
-    fill: var(--mg-white) !important;
+  header svg, header[role="banner"] svg, .private-topbar svg,
+  nav[aria-label*="Primary" i] svg, .private-nav svg, aside svg {
+    fill: var(--mg-rail-text) !important;
   }
+
   /* Such-Feld in der Top-Bar: dezente helle Fläche statt Navy-Volltreffer */
   header input[type="search"],
   header input[placeholder*="Such" i],
@@ -82,34 +108,8 @@
     color: var(--mg-white) !important;
   }
 
-  /* =========================================================
-     2. LINKE ICON-RAIL (CRM/Marketing/Sales/…) -> WEISS,
-     graue inaktive Einträge, blaue Pille nur für aktiven Eintrag.
-     ========================================================= */
-  nav[aria-label*="Primary" i],
-  nav[aria-label*="Main" i],
-  [role="navigation"][aria-label*="Primary" i],
-  .private-nav,
-  .private-nav__primary-nav,
-  #navAppContainer,
-  aside {
-    background: var(--mg-bg-soft) !important;
-    background-color: var(--mg-bg-soft) !important;
-    border-right: 1px solid var(--mg-border) !important;
-  }
-  nav[aria-label*="Primary" i] *,
-  .private-nav *,
-  aside * {
-    color: var(--mg-gray-text) !important;
-  }
-  nav[aria-label*="Primary" i] svg,
-  .private-nav svg,
-  aside svg {
-    fill: var(--mg-gray-icon) !important;
-  }
-
   /* Aktiver Eintrag: blaue Pille, weißer Text/Icon (höhere Spezifität
-     als die grauen Regeln oben, damit sie hier gewinnt) */
+     als die helle Standard-Regel oben, damit sie hier gewinnt) */
   .private-nav [aria-current="page"],
   nav[aria-label*="Primary" i] [aria-current="page"],
   aside [aria-current="page"],
@@ -128,7 +128,7 @@
   }
 
   /* =========================================================
-     3. INHALTS-LINKS (nur im Hauptbereich, NICHT in Top-Bar/Rail)
+     2. INHALTS-LINKS (nur im Hauptbereich, NICHT in Top-Bar/Rail)
      ========================================================= */
   main a:not([class*="button" i]),
   [role="main"] a:not([class*="button" i]),
@@ -138,7 +138,7 @@
   }
 
   /* =========================================================
-     4. PRIMÄR-BUTTONS (grün/orange -> metergrid-Blau)
+     3. PRIMÄR-BUTTONS (grün/orange -> metergrid-Blau)
      ========================================================= */
   button[class*="primary" i],
   .uiButton--primary,
@@ -164,7 +164,7 @@
   }
 
   /* =========================================================
-     5. SEITEN-HINTERGRUND + KARTEN (Look des metergrid-Dashboards)
+     4. SEITEN-HINTERGRUND + KARTEN (Look des metergrid-Dashboards)
      ========================================================= */
   #app,
   main,
@@ -182,7 +182,7 @@
   }
 
   /* =========================================================
-     6. FUNKTIONALE FARBEN – bewusst unverändert lassen
+     5. FUNKTIONALE FARBEN – bewusst unverändert lassen
      (Rot = Fehler/überfällig, wie "Offene Zahlungen" im metergrid-
      Portal auch nicht der Markenfarbe folgt). Nur helle Erfolgs-
      Badges an das metergrid-Mint angleichen:

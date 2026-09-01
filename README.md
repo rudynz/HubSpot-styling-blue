@@ -2,14 +2,17 @@
 
 Stylus-Userstyle, das HubSpot im Corporate Design des metergrid Mieterstromportals einfärbt (Navy/Blau statt HubSpot-Standard Schwarz/Orange).
 
-## Struktur (v2)
+## Struktur (v3)
 
-Zeilenweises Pixel-Sampling der metergrid-Sidebar ergab: nur das obere Logo/Such-Band ist Navy — die eigentliche Nav-Liste darunter ist **weiß**, mit grauem Text für inaktive Einträge und einer blauen Pille nur für den aktiven Eintrag. v1 hatte fälschlich die gesamte Sidebar navy + Linktext blau gesetzt, was (wo die Navy-Regel nicht griff) zu blauer Schrift auf HubSpots dunkelgrauem Standardhintergrund führte — schlechter Kontrast. v2 bildet die reale Struktur ab:
+**v1:** gesamte Sidebar navy + Linktext blau gesetzt → wo die Navy-Regel nicht griff, blieb HubSpots dunkelgrauer Standardhintergrund, kombiniert mit blauem Linktext = schlechter Kontrast.
+
+**v2:** 1:1-Nachbau der metergrid-Website per Zeilen-Sampling ergab dort eine weiße Sidebar (nur das Logo-Band oben ist navy) — technisch korrekt gegenüber der Quelle, aber nicht der gewünschte Look.
+
+**v3:** Referenz-Screenshots eines älteren, als angenehmer empfundenen HubSpot-Designs zeigen eine durchgehende weiche Blaugrau-Fläche (`#394651`) über Top-Bar *und* komplette linke Icon-Rail als ein Block. v3 übernimmt diese Struktur, ersetzt den Ton aber durch metergrid-Navy — und hält Schrift in der Rail konsequent **hell/weiß statt blau**, damit der v1-Kontrastfehler strukturell nicht mehr auftreten kann.
 
 | HubSpot-Element | Wird zu |
 |---|---|
-| Top-Bar (volle Breite, oben) | Navy `#002c96`, weiße Schrift/Icons |
-| Icon-Rail links (CRM/Sales/…) | Weiß `#fcfdfe`, grauer Text (`#5d7182`) für inaktive Einträge |
+| Top-Bar + Icon-Rail links (eine Fläche) | Navy `#002c96`, helle Schrift/Icons `#c9d4e8` (nie Blau) |
 | Aktiver Nav-Eintrag | Blaue Pille `#005edf`, weißer Text |
 | Primär-Buttons | `#005edf`, Hover `#264ca6` |
 | Links im Content-Bereich | `#005edf` (nur `main`/`[role="main"]`, nicht Top-Bar/Rail) |
