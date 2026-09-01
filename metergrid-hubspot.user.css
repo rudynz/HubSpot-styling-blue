@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           HubSpot – metergrid CI/CD
 @namespace      metergrid.de
-@version        3.0.0
+@version        4.0.0
 @description    Reskin des HubSpot-Portals im Corporate Design des metergrid Mieterstromportals.
 @author         claude@23r.de
 @preprocessor   default
@@ -43,6 +43,15 @@
   (stabiler) plus bekannte HubSpot-Klassen als Fallback. Falls ein
   Element nicht greift, per DevTools (Rechtsklick -> Untersuchen) den
   echten Klassennamen ablesen und ergänzen.
+
+  v4: Live-Feedback war, dass v3 wie der Graustufen-"Bedtime Mode" eines
+  Handys aussieht. Grund: nur die Rail trug Farbe, der komplette Content-
+  Bereich (Überschriften, Tabellen, Rahmen, Formular-Akzente) blieb
+  HubSpots neutrales Schwarz/Grau/Weiß - das wirkt wie ein Kontrastfilter,
+  nicht wie ein Markendesign. v4 zieht metergrid-Blau in den Content
+  rein: Überschriften in gedämpftem Navy statt Schwarz, sichtbar blau
+  getönter Seiten-Hintergrund/Rahmen/Tabellen-Header, Blau als
+  Formular-Akzentfarbe (Checkbox/Radio) statt HubSpot-Orange.
 */
 
 @-moz-document regexp("https://(app|app-eu1|app-na1|app-na2)[a-z0-9-]*\.hubspot\.com/.*") {
@@ -53,10 +62,11 @@
     --mg-blue: #005edf;       /* Primär-Buttons, aktive Pille, Links im Content */
     --mg-blue-mid: #264ca6;   /* Such-Feld auf Navy, Hover-Flächen */
     --mg-mint: #e0faf2;       /* helle Erfolg-/Badge-Hintergründe */
-    --mg-bg: #f7f9fc;         /* Seiten-Hintergrund (Content-Bereich) */
+    --mg-bg: #eef3fb;         /* Seiten-Hintergrund, sichtbar blau statt fast-weiß */
     --mg-bg-soft: #fcfdfe;    /* Karten-Hintergrund (fast weiß) */
-    --mg-border: #e2e8f0;     /* Kartenränder */
+    --mg-border: #cfdcf0;     /* Rahmen/Trennlinien, sichtbar blau statt neutral grau */
     --mg-rail-text: #c9d4e8;  /* inaktive Schrift/Icons in der Rail (hell, NIE Blau) */
+    --mg-text: #1e2a4a;       /* Überschriften/Fließtext statt HubSpot-Schwarz/Grau */
     --mg-white: #ffffff;
   }
 
@@ -182,7 +192,45 @@
   }
 
   /* =========================================================
-     5. FUNKTIONALE FARBEN – bewusst unverändert lassen
+     5. TEXT, TABELLEN, FORMULARE – Blauton statt Grayscale
+     Ohne diesen Abschnitt trägt nur die Rail Farbe, der Rest
+     (Überschriften, Tabellen, Rahmen, Formular-Akzente) bleibt
+     HubSpots neutrales Schwarz/Grau -> wirkt dann wie ein reiner
+     Kontrastfilter statt wie ein Markendesign ("Bedtime Mode"-Effekt).
+     ========================================================= */
+  main h1, main h2, main h3, main h4, main h5, main h6,
+  [role="main"] h1, [role="main"] h2, [role="main"] h3,
+  [role="main"] h4, [role="main"] h5, [role="main"] h6,
+  .private-main-container h1, .private-main-container h2,
+  .private-main-container h3 {
+    color: var(--mg-text) !important;
+  }
+
+  /* Tabellen: leichte Blau-Tönung statt neutralem Grau bei Header/Rahmen */
+  th, thead, [class*="tableHeader" i], [role="columnheader"] {
+    background-color: var(--mg-bg) !important;
+  }
+  table, td, th {
+    border-color: var(--mg-border) !important;
+  }
+
+  /* Checkboxen/Radios/Regler: Blau statt HubSpot-Orange als Akzentfarbe */
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    accent-color: var(--mg-blue) !important;
+  }
+
+  /* Aktiver Tab/Filter (z.B. Deal-Views): Blau statt Schwarz */
+  [role="tab"][aria-selected="true"],
+  [class*="tab" i][class*="active" i],
+  [class*="tab" i][class*="selected" i] {
+    color: var(--mg-blue) !important;
+    border-color: var(--mg-blue) !important;
+  }
+
+  /* =========================================================
+     6. FUNKTIONALE FARBEN – bewusst unverändert lassen
      (Rot = Fehler/überfällig, wie "Offene Zahlungen" im metergrid-
      Portal auch nicht der Markenfarbe folgt). Nur helle Erfolgs-
      Badges an das metergrid-Mint angleichen:
