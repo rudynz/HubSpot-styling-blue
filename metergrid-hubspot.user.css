@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           HubSpot – metergrid CI/CD
 @namespace      metergrid.de
-@version        5.0.0
+@version        6.0.0
 @description    Reskin des HubSpot-Portals im Corporate Design des metergrid Mieterstromportals.
 @author         claude@23r.de
 @preprocessor   default
@@ -56,6 +56,24 @@
   Klassen-basierte Selektoren (die [class*="..."]-Regeln) im Live-Portal
   nicht mehr greifen, bitte per DevTools den aktuellen Klassennamen/
   data-test-id ablesen und die betreffende Regel ergänzen/korrigieren.
+
+  v6 BESTÄTIGT DAS RESIDUALRISIKO: Per DevTools-Export (getComputedStyle
+  auf :root, siehe README) hat der Nutzer die tatsächlich live gesetzten
+  CSS-Variablen geliefert. HubSpot nutzt inzwischen ~880 statt ~220
+  --trellis-color-*-Variablen - allen voran eine komplett neue Familie
+  --trellis-color-fwc-* ("Framework Web Components": Buttons, Links,
+  Inputs, Tabellen), die die v5-Extension noch nicht kannte. Dadurch
+  blieben zentrale Elemente (v.a. Buttons) auf HubSpots eigenem
+  Alt-Farbschema (dunkles Teal #00494b) hängen, während die Chrome
+  drumherum schon metergrid-Blau zeigte - der gemeldete "Bedtime Mode"/
+  hässliche Farb-Mix. v6 klassifiziert und mappt diese ~660 neuen
+  Variablen automatisiert (Skript, nicht von Hand), mit denselben
+  Ausschlussregeln wie beim Rest: Tag/Badge/Ribbon-Farben (Nutzer-
+  wählbare Label-Farben), Breeze/Copilot-Submarke, Report-Chart-/
+  Highlight-Farben und alles mit ursprünglich transparentem Wert
+  (rgba(...,0) / "transparent" - sonst wären unsichtbare Link-
+  Unterstriche, randlose Tabellen und Ghost-Icons plötzlich sichtbar
+  geworden) bleiben unangetastet.
 */
 
 @-moz-document regexp("https://(app|app-eu1|app-na1|app-na2)[a-z0-9-]*\.hubspot\.com/.*") {
@@ -286,6 +304,179 @@
     --trellis-color-fill-transitional-shadow: rgba(0, 0, 0, 0.5) !important;
     --view-tabs-inactive-bg-color: #fcfdfe !important;
     --data-agent-background-color-light: #fcfdfe !important;
+
+    /* ---------------------------------------------------------
+       v6: NEUE Variablenfamilien aus dem Live-Redesign, die es beim
+       ursprünglichen Extension-Extract (v5) noch nicht gab - vor
+       allem --trellis-color-fwc-* (Buttons/Links/Inputs in HubSpots
+       neuestem Component-Framework). Per DevTools-Export des Nutzers
+       ermittelt, klassifiziert (Skip-Regeln: Tag/Badge/Ribbon-Farben,
+       Breeze/Copilot-Submarke, Report-Chart-/Highlight-Farben, reine
+       transparent/rgba(...,0)-Werte für Ghost-Icons & unsichtbare
+       Ränder bleiben unangetastet) und automatisch gemappt statt
+       einzeln von Hand geraten. Details siehe README.
+       --------------------------------------------------------- */
+    --trellis-color-border-container-default: #cfdcf0 !important;
+    --trellis-color-border-secondary-disabled-alt: #e6edf7 !important;
+    --trellis-color-fill-inverse-primary: #005edf !important;
+    --trellis-color-fwc-button-border-core-default: #cfdcf0 !important;
+    --trellis-color-fwc-button-border-core-hover: #a9c3e8 !important;
+    --trellis-color-fwc-button-border-core-on-fill-default: #ffffff !important;
+    --trellis-color-fwc-button-border-inverse-default: #005edf !important;
+    --trellis-color-fwc-button-border-inverse-default-alt: #005edf !important;
+    --trellis-color-fwc-button-border-inverse-disabled: #e6edf7 !important;
+    --trellis-color-fwc-button-border-primary-default: #005edf !important;
+    --trellis-color-fwc-button-border-primary-hover: #a9c3e8 !important;
+    --trellis-color-fwc-button-border-primary-pressed: #002c96 !important;
+    --trellis-color-fwc-button-border-secondary-default: #005edf !important;
+    --trellis-color-fwc-button-border-secondary-default-alt: #005edf !important;
+    --trellis-color-fwc-button-border-secondary-disabled: #e6edf7 !important;
+    --trellis-color-fwc-button-border-secondary-disabled-alt: #e6edf7 !important;
+    --trellis-color-fwc-button-border-secondary-toolbar-default: #005edf !important;
+    --trellis-color-fwc-button-border-secondary-toolbar-disabled: #e6edf7 !important;
+    --trellis-color-fwc-button-border-tertiary-default: #005edf !important;
+    --trellis-color-fwc-button-border-tertiary-disabled: #e6edf7 !important;
+    --trellis-color-fwc-button-fill-field-default-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-inverse-default: #ffffff !important;
+    --trellis-color-fwc-button-fill-inverse-default-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-inverse-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-fill-inverse-disabled-alt: #9ca3af !important;
+    --trellis-color-fwc-button-fill-inverse-hover: #ffffff !important;
+    --trellis-color-fwc-button-fill-inverse-hover-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-inverse-pressed: #ffffff !important;
+    --trellis-color-fwc-button-fill-inverse-pressed-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-primary-default: #ffffff !important;
+    --trellis-color-fwc-button-fill-primary-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-fill-primary-hover: #ffffff !important;
+    --trellis-color-fwc-button-fill-primary-pressed: #ffffff !important;
+    --trellis-color-fwc-button-fill-secondary-default: #ffffff !important;
+    --trellis-color-fwc-button-fill-secondary-default-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-secondary-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-fill-secondary-disabled-alt: #9ca3af !important;
+    --trellis-color-fwc-button-fill-secondary-hover: #ffffff !important;
+    --trellis-color-fwc-button-fill-secondary-hover-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-secondary-pressed: #ffffff !important;
+    --trellis-color-fwc-button-fill-secondary-pressed-alt: #ffffff !important;
+    --trellis-color-fwc-button-fill-surface-default: #ffffff !important;
+    --trellis-color-fwc-button-fill-surface-raised: #ffffff !important;
+    --trellis-color-fwc-button-fill-tertiary-default: #ffffff !important;
+    --trellis-color-fwc-button-fill-tertiary-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-fill-tertiary-hover: #ffffff !important;
+    --trellis-color-fwc-button-fill-tertiary-pressed: #ffffff !important;
+    --trellis-color-fwc-button-specialty-link-on-fill-alt-default: #ffffff !important;
+    --trellis-color-fwc-button-specialty-link-on-fill-alt-pressed: #ffffff !important;
+    --trellis-color-fwc-button-specialty-link-on-fill-default: #ffffff !important;
+    --trellis-color-fwc-button-specialty-link-on-fill-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-specialty-link-on-fill-hover: #ffffff !important;
+    --trellis-color-fwc-button-specialty-link-on-fill-pressed: #ffffff !important;
+    --trellis-color-fwc-button-specialty-secondary-toolbar-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-specialty-secondary-toolbar-hover: #e4edfa !important;
+    --trellis-color-fwc-button-specialty-secondary-toolbar-pressed: #005edf !important;
+    --trellis-color-fwc-button-specialty-tertiary-on-fill-default: #ffffff !important;
+    --trellis-color-fwc-button-specialty-tertiary-on-fill-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-specialty-tertiary-on-fill-hover: #ffffff !important;
+    --trellis-color-fwc-button-specialty-tertiary-on-fill-pressed: #ffffff !important;
+    --trellis-color-fwc-button-specialty-text-core-alt-default: #1e2a4a !important;
+    --trellis-color-fwc-button-specialty-text-interactive-alt-default: #005edf !important;
+    --trellis-color-fwc-button-specialty-text-interactive-alt-hover: #264ca6 !important;
+    --trellis-color-fwc-button-specialty-text-interactive-alt-pressed: #002c96 !important;
+    --trellis-color-fwc-button-text-core-default: #1e2a4a !important;
+    --trellis-color-fwc-button-text-core-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-text-interactive-default: #005edf !important;
+    --trellis-color-fwc-button-text-interactive-default-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-text-interactive-default-hover: #264ca6 !important;
+    --trellis-color-fwc-button-text-interactive-default-pressed: #002c96 !important;
+    --trellis-color-fwc-button-text-inverse-default: #1e2a4a !important;
+    --trellis-color-fwc-button-text-inverse-default-alt: #1e2a4a !important;
+    --trellis-color-fwc-button-text-inverse-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-text-inverse-disabled-alt: #9ca3af !important;
+    --trellis-color-fwc-button-text-inverse-hover: #264ca6 !important;
+    --trellis-color-fwc-button-text-inverse-pressed: #002c96 !important;
+    --trellis-color-fwc-button-text-primary-default: #ffffff !important;
+    --trellis-color-fwc-button-text-primary-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-text-secondary-default: #1e2a4a !important;
+    --trellis-color-fwc-button-text-secondary-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-text-secondary-toolbar-default: #1e2a4a !important;
+    --trellis-color-fwc-button-text-secondary-toolbar-disabled: #9ca3af !important;
+    --trellis-color-fwc-button-text-tertiary-default: #1e2a4a !important;
+    --trellis-color-fwc-button-text-tertiary-disabled: #9ca3af !important;
+    --trellis-color-fwc-link-icon-core-default: #1e2a4a !important;
+    --trellis-color-fwc-link-icon-interactive-default: #005edf !important;
+    --trellis-color-fwc-link-icon-interactive-on-fill-default: #ffffff !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-alt-default: #ffffff !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-alt-disabled: #9ca3af !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-alt-hover: #ffffff !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-alt-pressed: #ffffff !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-default: #ffffff !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-disabled: #9ca3af !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-hover: #ffffff !important;
+    --trellis-color-fwc-link-specialty-link-on-fill-pressed: #ffffff !important;
+    --trellis-color-fwc-link-specialty-text-core-alt-default: #1e2a4a !important;
+    --trellis-color-fwc-link-specialty-text-interactive-alt-default: #005edf !important;
+    --trellis-color-fwc-link-specialty-text-interactive-alt-hover: #264ca6 !important;
+    --trellis-color-fwc-link-specialty-text-interactive-alt-pressed: #002c96 !important;
+    --trellis-color-fwc-link-text-core-default: #1e2a4a !important;
+    --trellis-color-fwc-link-text-core-disabled: #9ca3af !important;
+    --trellis-color-fwc-link-text-interactive-default: #005edf !important;
+    --trellis-color-fwc-link-text-interactive-default-disabled: #9ca3af !important;
+    --trellis-color-fwc-link-text-interactive-default-hover: #264ca6 !important;
+    --trellis-color-fwc-link-text-interactive-default-pressed: #002c96 !important;
+    --trellis-color-fwc-link-underline-hover: #264ca6 !important;
+    --trellis-color-fwc-link-underline-pressed: #002c96 !important;
+    --trellis-color-fwc-loadingspinner-indicator-ghost: #005edf !important;
+    --trellis-color-fwc-loadingspinner-indicator-link: #005edf !important;
+    --trellis-color-fwc-loadingspinner-indicator-onfill: #005edf !important;
+    --trellis-color-fwc-loadingspinner-indicator-primary: #005edf !important;
+    --trellis-color-fwc-loadingspinner-indicator-success: #005edf !important;
+    --trellis-color-fwc-loadingspinner-indicator-tertiary: #005edf !important;
+    --trellis-color-fwc-loadingspinner-ring-link: #1e2a4a !important;
+    --trellis-color-fwc-loadingspinner-ring-onfill: #eef3fb !important;
+    --trellis-color-fwc-progress-fill-empty: #eef3fb !important;
+    --trellis-color-fwc-progress-text-default: #1e2a4a !important;
+    --trellis-color-fwc-radio-border-default: #005edf !important;
+    --trellis-color-fwc-radio-border-readonly: #005edf !important;
+    --trellis-color-fwc-radio-fill-readonly-indicator: #005edf !important;
+    --trellis-color-fwc-radio-text-readonly: #1e2a4a !important;
+    --trellis-color-fwc-searchinput-border-default: #005edf !important;
+    --trellis-color-fwc-selectable-border-default: #005edf !important;
+    --trellis-color-fwc-selectable-border-selected: #005edf !important;
+    --trellis-color-fwc-table-header-text-default: #1e2a4a !important;
+    --trellis-color-fwc-textinput-border-readonly: #005edf !important;
+    --trellis-color-fwc-textinput-fill-readonly: #eef3fb !important;
+    --trellis-color-fwc-toggle-border-readonly: #005edf !important;
+    --trellis-color-global-shell-border-search-btn-border-default: #005edf !important;
+    --trellis-color-global-shell-border-search-btn-border-hover: #a9c3e8 !important;
+    --trellis-color-global-shell-border-search-field-border-default: #005edf !important;
+    --trellis-color-global-shell-fill-editortitle-hover: #e4edfa !important;
+    --trellis-color-global-shell-icon-bookmark-hover: #264ca6 !important;
+    --trellis-color-global-shell-icon-bookmark-selected: #1e2a4a !important;
+    --trellis-color-global-shell-icon-copilot-default: #1e2a4a !important;
+    --trellis-color-global-shell-text-copilot-default: #1e2a4a !important;
+    --trellis-color-global-shell-text-copilot-hover: #264ca6 !important;
+    --trellis-color-global-shell-text-nav-item-default-subtle: #5d7182 !important;
+    --trellis-color-global-shell-text-nav-item-hover-subtle: #264ca6 !important;
+    --trellis-color-global-shell-text-nav-item-selected-subtle: #5d7182 !important;
+    --trellis-color-icon-brand-on-fill-subtle: #ffffff !important;
+    --trellis-color-icon-interactive-on-fill-hover: #ffffff !important;
+    --trellis-color-icon-interactive-on-fill-pressed: #ffffff !important;
+    --trellis-color-icon-interactive-on-fill-subtle: #ffffff !important;
+    --trellis-color-icon-inverse-disabled-alt: #9ca3af !important;
+    --trellis-color-icon-primary-on-fill-subtle: #ffffff !important;
+    --trellis-color-specialty-filter-pressed: #005edf !important;
+    --trellis-color-specialty-link-on-fill-alt-default: #ffffff !important;
+    --trellis-color-specialty-link-on-fill-alt-disabled: #9ca3af !important;
+    --trellis-color-specialty-link-on-fill-alt-hover: #ffffff !important;
+    --trellis-color-specialty-link-on-fill-alt-pressed: #ffffff !important;
+    --trellis-color-specialty-tertiary-on-fill-default: #ffffff !important;
+    --trellis-color-specialty-tertiary-on-fill-disabled: #9ca3af !important;
+    --trellis-color-specialty-tertiary-on-fill-hover: #ffffff !important;
+    --trellis-color-specialty-tertiary-on-fill-pressed: #ffffff !important;
+    --trellis-color-fwc-loadingspinner-ring-primary: #005edf !important;
+    --trellis-color-fwc-loadingspinner-ring-ghost: #005edf !important;
+    --trellis-color-fwc-loadingspinner-ring-tertiary: #005edf !important;
+    --trellis-color-fwc-button-specialty-secondary-toolbar-default: #1e2a4a !important;
+    --trellis-color-fwc-table-divider-color-emphasis: #cfdcf0 !important;
+
   }
 
     /* V2 Data-Driven Theme Overrides */

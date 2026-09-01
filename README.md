@@ -12,14 +12,18 @@ Stylus-Userstyle, das HubSpot im Corporate Design des metergrid Mieterstromporta
 
 **v4:** Live-Feedback zu v3 war, dass es wie der Graustufen-„Bedtime Mode“ eines Handys wirkt — nur die Rail trug Farbe, der Content blieb HubSpots neutrales Schwarz/Grau/Weiß. v4 zieht metergrid-Blau in den Content rein.
 
-**v5 (aktuell): datengetrieben statt geraten.** v1-v4 haben Selektoren von Hand geraten — fehleranfällig. Für v5 wurde die im Chrome Web Store frei verfügbare Extension [HubSpot Theme Changer](https://chromewebstore.google.com/detail/hubspot-theme-changer/pjndnibpagckfdcechcpbmoelmeenljc) heruntergeladen und ihr (clientseitig ohnehin einsehbarer) Code analysiert. Das brachte zwei Dinge zutage:
+**v5: datengetrieben statt geraten.** v1-v4 haben Selektoren von Hand geraten — fehleranfällig. Für v5 wurde die im Chrome Web Store frei verfügbare Extension [HubSpot Theme Changer](https://chromewebstore.google.com/detail/hubspot-theme-changer/pjndnibpagckfdcechcpbmoelmeenljc) heruntergeladen und ihr (clientseitig ohnehin einsehbarer) Code analysiert. Das brachte zwei Dinge zutage:
 
-1. HubSpot nutzt ein eigenes Design-Token-System namens **Trellis** mit ca. 220 CSS-Custom-Properties (`--trellis-color-*`) auf `:root`/`html[data-hubspot-theme]`. Diese zu setzen ist deutlich robuster als einzelne Komponenten-Klassen zu raten, weil HubSpots eigene Komponenten sie selbst konsumieren.
-2. Als Ergänzung extrahiert die Extension reale, funktionierende Selektoren (`data-test-id`, `#hs-vertical-nav`, `#hs-global-toolbar`, Styled-Components-Klassenpräfixe) für Dutzende HubSpot-Bereiche — CRM-Tabellen, Dashboards, Help Desk, Academy, Report-Charts (Highcharts), Datenmodell-Diagramme (React Flow) und mehr.
+1. HubSpot nutzt ein eigenes Design-Token-System namens **Trellis** mit CSS-Custom-Properties (`--trellis-color-*`) auf `:root`/`html[data-hubspot-theme]`. Diese zu setzen ist deutlich robuster als einzelne Komponenten-Klassen zu raten, weil HubSpots eigene Komponenten sie selbst konsumieren.
+2. Als Ergänzung extrahiert die Extension reale, funktionierende Selektoren (`data-test-id`, `#hs-vertical-nav`, `#hs-global-toolbar`, Styled-Components-Klassenpräfixe) für Dutzende HubSpot-Bereiche.
 
-Die metergrid-Palette wurde durch dieselbe Generator-Funktion der Extension gejagt statt von Hand übertragen (schließt Fehler bei ~220 Variablen aus). **Bewusst entfernt:** die generischen Badge/Tag/Alert-Overrides der Extension — die hätten ALLE Badges/Alerts (auch rote Fehler-/Mahn-Badges) pauschal auf metergrid-Blau umgefärbt und damit die Status-Semantik zerstört.
+Die metergrid-Palette wurde durch dieselbe Generator-Funktion der Extension gejagt statt von Hand übertragen. **Bewusst entfernt:** die generischen Badge/Tag/Alert-Overrides der Extension — die hätten ALLE Badges/Alerts (auch rote Fehler-/Mahn-Badges) pauschal auf metergrid-Blau umgefärbt und damit die Status-Semantik zerstört.
 
-⚠️ **Residualrisiko:** HubSpot hat kürzlich ein Redesign durchgeführt; die Extension könnte an manchen Stellen nicht ganz aktuell sein. Sie referenziert bereits Copilot/Breeze-Selektoren (HubSpots aktuelle KI-Features) — das spricht für einen einigermaßen aktuellen Stand, ist aber keine Garantie. Die CSS-Variablen sind das robustere Fundament (wirken unabhängig von Klassennamen); falls einzelne `[class*="..."]`-Regeln im Live-Portal nicht greifen, per DevTools den aktuellen Klassennamen/`data-test-id` ablesen und ergänzen.
+**v6 (aktuell): Lücke im Redesign geschlossen, mit echten Live-Daten statt Extension-Vermutung.** v5 warnte bereits vor einem Residualrisiko durch HubSpots Redesign — bestätigt: Per DevTools-Export (`getComputedStyle` auf `:root`, Anleitung siehe unten) hat der Nutzer die tatsächlich live gesetzten CSS-Variablen geliefert. Ergebnis: HubSpot nutzt inzwischen **~880 statt ~220** `--trellis-color-*`-Variablen — vor allem eine komplett neue Familie `--trellis-color-fwc-*` ("Framework Web Components": Buttons, Links, Inputs, Tabellen), die die v5-Extension noch nicht kannte. Dadurch blieben zentrale Elemente (v.a. Buttons) auf HubSpots eigenem Alt-Farbschema (dunkles Teal `#00494b`) hängen, während die Chrome drumherum schon metergrid-Blau zeigte → der gemeldete "Bedtime Mode"-Effekt/hässliche Farb-Mix.
+
+v6 klassifiziert und mappt die ~660 neuen Variablen automatisiert per Skript (nicht von Hand), mit denselben Ausschlussregeln wie zuvor: Tag/Badge/Ribbon-Farben (nutzerwählbare Label-Farben), Breeze/Copilot-Submarke, Report-Chart-/Highlight-Farben bleiben unangetastet. **Zusätzlich neu entdeckt und gefixt:** mehrere Variablen mit ursprünglich transparentem Wert (`rgba(...,0)`/`transparent`) — z.B. unsichtbare Link-Unterstriche, randlose Tabellen, ein "Ghost"-Lesezeichen-Icon — wären durch reines Namens-Mapping fälschlich in solide Farben verwandelt worden. Diese werden jetzt anhand des tatsächlichen Live-Werts erkannt und übersprungen, nicht nur anhand des Variablennamens.
+
+⚠️ **Weiterhin denkbares Residualrisiko:** Sollte HubSpot künftig erneut Token-Namen ändern, hilft derselbe DevTools-Export erneut weiter.
 
 ## Was sich ändert
 
@@ -33,6 +37,36 @@ Die metergrid-Palette wurde durch dieselbe Generator-Funktion der Extension geja
 | Karten, Tabellen, Inputs, Tabs, Menüs, Checkboxen, Tooltips, Charts, Scrollbars | durchgehend metergrid-Farbschema (siehe CSS-Datei, Abschnitt „V2 Data-Driven Theme Overrides“) |
 
 Rote/Warn-Farben (überfällige Zahlungen, Fehler) bleiben unverändert — analog zum metergrid-Portal, wo Statusfarben von der Markenfarbe getrennt sind.
+
+## Bei künftigen HubSpot-Redesigns: Live-Variablen exportieren
+
+Falls das Theme nach einem HubSpot-Update wieder "falsch" aussieht: In der DevTools-Console (F12) auf einer HubSpot-Seite `allow pasting` eintippen (Chromes Self-XSS-Schutz), dann folgendes Script einfügen — kopiert alle aktuell live gesetzten `--trellis-*`-Variablen automatisch in die Zwischenablage:
+
+```js
+(() => {
+  const props = new Set();
+  for (const sheet of document.styleSheets) {
+    let rules;
+    try { rules = sheet.cssRules; } catch (e) { continue; }
+    for (const rule of rules || []) {
+      if (rule.style) {
+        for (let i = 0; i < rule.style.length; i++) {
+          const p = rule.style[i];
+          if (p.startsWith('--')) props.add(p);
+        }
+      }
+    }
+  }
+  const cs = getComputedStyle(document.documentElement);
+  const vars = {};
+  [...props].sort().forEach(p => vars[p] = cs.getPropertyValue(p).trim());
+  const out = JSON.stringify(vars, null, 2);
+  console.log(out);
+  copy(out);
+})();
+```
+
+Das Ergebnis (JSON aller Variablen + aktueller Werte) gegen die `:root`-Sektion in `metergrid-hubspot.user.css` diffen, um neue/geänderte Variablenfamilien zu finden.
 
 ## Installation
 
