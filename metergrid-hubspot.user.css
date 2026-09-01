@@ -1,92 +1,144 @@
 /* ==UserStyle==
 @name           HubSpot – metergrid CI/CD
 @namespace      metergrid.de
-@version        1.0.0
-@description    Reskin des HubSpot-Portals im Corporate Design des metergrid Mieterstromportals (Navy/Blau statt Schwarz/Orange).
+@version        2.0.0
+@description    Reskin des HubSpot-Portals im Corporate Design des metergrid Mieterstromportals.
 @author         claude@23r.de
 @preprocessor   default
 ==/UserStyle== */
 
 /*
   Installation (Stylus-Extension):
-  1. Stylus-Icon -> "Manage" -> "Import" -> diese Datei auswählen
-     (oder: "Write new style" -> Code hier reinkopieren, Speichern reicht,
-     der @-moz-document-Block unten übernimmt automatisch das URL-Matching).
+  1. Stylus-Icon -> "Manage" -> "Import" -> diese Datei auswählen.
   2. Prüfen, ob eure HubSpot-Instanz auf einer anderen Subdomain läuft
      (z.B. app-eu1.hubspot.com, app-na2.hubspot.com) - falls ja, die Regex
      unten unter @-moz-document ergänzen.
 
-  Farbherkunft: Werte per Pixel-Sampling aus den bereitgestellten
-  metergrid-Portal-Screenshots extrahiert (input/Screenshot ... 11.35.36.png).
-  HubSpot-Ist-Farben (#333333 Chrome, #fb4f20 Orange, #1d70de Link-Blau)
-  ebenfalls aus den HubSpot-Screenshots gesampelt.
+  Farbherkunft: Werte per Pixel-Sampling aus den metergrid-Portal-
+  Screenshots extrahiert (input/Screenshot ... 11.35.36.png), reihenweise
+  gescannt statt an Einzelpunkten geraten.
 
-  WICHTIG: HubSpot rendert seine Navigation teilweise mit dynamisch
-  gehashten Klassennamen. Die Selektoren unten setzen primär auf
-  ARIA-Rollen/Landmarks (stabiler als Klassennamen) plus bekannte
-  HubSpot-Klassen als Fallback. Abschnitte mit "// PRÜFEN" ggf. per
-  DevTools (Rechtsklick -> Untersuchen) nachjustieren, falls ein
-  Element nicht greift.
+  WICHTIGE ERKENNTNIS aus dem Sampling (v2 gegenüber v1 korrigiert):
+  Im metergrid-Portal ist NUR das obere Logo/Such-Band der linken Spalte
+  Navy (#002c96). Die eigentliche Nav-Liste darunter ist WEISS, mit
+  grauem Text für inaktive Einträge und einer blauen Pille (#005edf)
+  nur für den aktiven Eintrag. v1 hatte fälschlich die GESAMTE Sidebar
+  navy + Linktext blau gesetzt -> das ergab (wo die Navy-Regel nicht
+  griff) blaue Schrift auf HubSpots dunkelgrauem Standard-Hintergrund =
+  schlechter Kontrast. Diese Version bildet die echte Struktur ab:
+
+    HubSpot Top-Bar (volle Breite, oben)   -> Navy  (= metergrid Logo-Band)
+    HubSpot Icon-Rail (links, CRM/Sales/…) -> Weiß  (= metergrid Nav-Liste)
+      - inaktiv: grauer Text/Icon
+      - aktiv:   blaue Pille, weißer Text
+
+  HubSpot rendert Teile der Navigation mit dynamisch gehashten Klassen-
+  namen. Selektoren setzen primär auf ARIA-Rollen/Landmarks + Tags
+  (stabiler) plus bekannte HubSpot-Klassen als Fallback. Abschnitte mit
+  "// PRÜFEN" ggf. per DevTools nachjustieren.
 */
 
 @-moz-document regexp("https://(app|app-eu1|app-na1|app-na2)[a-z0-9-]*\.hubspot\.com/.*") {
 
   :root {
-    /* --- metergrid CI/CD Palette (aus Portal-Screenshot gesampelt) --- */
-    --mg-navy: #002c96;      /* Sidebar / Topbar / dunkle Flächen */
-    --mg-blue: #005edf;      /* Primär-Buttons, Links, aktive States */
-    --mg-blue-mid: #264ca6;  /* Hover-/sekundäre Flächen */
-    --mg-mint: #e0faf2;      /* helle Erfolg-/Badge-Hintergründe */
-    --mg-bg: #f7f9fc;        /* Seiten-Hintergrund */
-    --mg-bg-soft: #fcfdfe;   /* Karten-Hintergrund (fast weiß) */
-    --mg-border: #e2e8f0;    /* Kartenränder */
-    --mg-text-on-navy: #ffffff;
-
-    /* --- HubSpot Ist-Farben (zur Referenz, nicht überschreiben) --- */
-    --hs-chrome: #333333;
-    --hs-orange: #fb4f20;
-    --hs-link: #1d70de;
+    /* --- metergrid CI/CD Palette --- */
+    --mg-navy: #002c96;       /* Top-Bar / Logo-Band */
+    --mg-blue: #005edf;       /* Primär-Buttons, aktive Pille, Links im Content */
+    --mg-blue-mid: #264ca6;   /* Such-Feld auf Navy, Hover-Flächen */
+    --mg-mint: #e0faf2;       /* helle Erfolg-/Badge-Hintergründe */
+    --mg-bg: #f7f9fc;         /* Seiten-Hintergrund (Content-Bereich) */
+    --mg-bg-soft: #fcfdfe;    /* Karten-Hintergrund (fast weiß) */
+    --mg-border: #e2e8f0;     /* Kartenränder */
+    --mg-gray-icon: #8998a4;  /* inaktives Icon in der Nav-Liste */
+    --mg-gray-text: #5d7182;  /* inaktiver Text in der Nav-Liste */
+    --mg-white: #ffffff;
   }
 
   /* =========================================================
-     1. TOPBAR + SIDEBAR (dunkle Chrome-Flächen -> metergrid Navy)
+     1. TOP-BAR (volle Breite, oben) -> Navy, helle Schrift/Icons
      ========================================================= */
+  header,
   header[role="banner"],
-  nav[aria-label*="Primary" i],
-  nav[aria-label*="Main" i],
-  [role="navigation"][aria-label*="Primary" i],
   .private-topbar,
-  #hs-nav-header,
-  .private-nav,
-  .private-nav__primary-nav,
-  #navAppContainer {
+  #hs-nav-header {
     background: var(--mg-navy) !important;
     background-color: var(--mg-navy) !important;
   }
+  header, header * ,
+  header[role="banner"], header[role="banner"] *,
+  .private-topbar, .private-topbar * {
+    color: var(--mg-white) !important;
+  }
+  header svg, header[role="banner"] svg, .private-topbar svg {
+    fill: var(--mg-white) !important;
+  }
+  /* Such-Feld in der Top-Bar: dezente helle Fläche statt Navy-Volltreffer */
+  header input[type="search"],
+  header input[placeholder*="Such" i],
+  header input[placeholder*="search" i] {
+    background-color: var(--mg-blue-mid) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    color: var(--mg-white) !important;
+  }
 
-  /* Aktiver/aufgeklappter Sidebar-Eintrag: heller Blauton statt Standard-Highlight */
+  /* =========================================================
+     2. LINKE ICON-RAIL (CRM/Marketing/Sales/…) -> WEISS,
+     graue inaktive Einträge, blaue Pille nur für aktiven Eintrag.
+     ========================================================= */
+  nav[aria-label*="Primary" i],
+  nav[aria-label*="Main" i],
+  [role="navigation"][aria-label*="Primary" i],
+  .private-nav,
+  .private-nav__primary-nav,
+  #navAppContainer,
+  aside {
+    background: var(--mg-bg-soft) !important;
+    background-color: var(--mg-bg-soft) !important;
+    border-right: 1px solid var(--mg-border) !important;
+  }
+  nav[aria-label*="Primary" i] *,
+  .private-nav *,
+  aside * {
+    color: var(--mg-gray-text) !important;
+  }
+  nav[aria-label*="Primary" i] svg,
+  .private-nav svg,
+  aside svg {
+    fill: var(--mg-gray-icon) !important;
+  }
+
+  /* Aktiver Eintrag: blaue Pille, weißer Text/Icon (höhere Spezifität
+     als die grauen Regeln oben, damit sie hier gewinnt) */
   .private-nav [aria-current="page"],
+  nav[aria-label*="Primary" i] [aria-current="page"],
+  aside [aria-current="page"],
   .private-nav [class*="active" i],
-  nav[aria-label*="Primary" i] [aria-current="page"] {
+  nav[aria-label*="Primary" i] [class*="active" i] {
     background-color: var(--mg-blue) !important;
     border-radius: 6px;
   }
-
-  /* =========================================================
-     2. MARKEN-AKZENTE: HubSpot-Orange (#fb4f20) -> metergrid-Blau
-     Betrifft Logo-Sprocket, Fokus-Ringe, aktive Tab-Unterstriche.
-     Funktionale Farben (rote Fehler-/Notification-Badges) bewusst
-     NICHT angefasst, siehe Abschnitt 5.
-     ========================================================= */
-  svg[fill="#fb4f20"],
-  [style*="fb4f20"],
-  .private-link,
-  a:not([class*="button"]) {
-    color: var(--mg-blue);
+  .private-nav [aria-current="page"] *,
+  nav[aria-label*="Primary" i] [aria-current="page"] *,
+  aside [aria-current="page"] *,
+  .private-nav [class*="active" i] *,
+  nav[aria-label*="Primary" i] [class*="active" i] * {
+    color: var(--mg-white) !important;
+    fill: var(--mg-white) !important;
   }
 
   /* =========================================================
-     3. PRIMÄR-BUTTONS (grün/orange -> metergrid-Blau)
+     3. INHALTS-LINKS (nur im Hauptbereich, NICHT in Top-Bar/Rail)
+     ========================================================= */
+  main a:not([class*="button" i]),
+  [role="main"] a:not([class*="button" i]),
+  .private-main-container a:not([class*="button" i]),
+  .private-link {
+    color: var(--mg-blue) !important;
+  }
+
+  /* =========================================================
+     4. PRIMÄR-BUTTONS (grün/orange -> metergrid-Blau)
      ========================================================= */
   button[class*="primary" i],
   .uiButton--primary,
@@ -94,7 +146,7 @@
   button[data-test-id*="primary" i] {
     background-color: var(--mg-blue) !important;
     border-color: var(--mg-blue) !important;
-    color: #ffffff !important;
+    color: var(--mg-white) !important;
   }
   button[class*="primary" i]:hover,
   .uiButton--primary:hover,
@@ -112,7 +164,7 @@
   }
 
   /* =========================================================
-     4. SEITEN-HINTERGRUND + KARTEN (Look des metergrid-Dashboards)
+     5. SEITEN-HINTERGRUND + KARTEN (Look des metergrid-Dashboards)
      ========================================================= */
   #app,
   main,
@@ -121,7 +173,6 @@
     background-color: var(--mg-bg) !important;
   }
 
-  /* Karten/Panels: helle Fläche, dezenter Rand, wie im metergrid-Dashboard */
   [class*="card" i],
   [class*="panel" i],
   .uiPanel {
@@ -131,28 +182,15 @@
   }
 
   /* =========================================================
-     5. FUNKTIONALE FARBEN – bewusst unverändert lassen
-     (Rot = Fehler/überfällig, Grün = Erfolg/aktiv), analog dazu,
-     wie auch das metergrid-Portal Statusfarben (rot bei "Offene
-     Zahlungen") von der Markenfarbe trennt. Nur die HELLEN
-     Erfolg-Badges an das metergrid-Mint angleichen:
+     6. FUNKTIONALE FARBEN – bewusst unverändert lassen
+     (Rot = Fehler/überfällig, wie "Offene Zahlungen" im metergrid-
+     Portal auch nicht der Markenfarbe folgt). Nur helle Erfolgs-
+     Badges an das metergrid-Mint angleichen:
      ========================================================= */
   [class*="badge" i][class*="success" i],
   [class*="tag" i][class*="green" i] {
     background-color: var(--mg-mint) !important;
     color: var(--mg-navy) !important;
-  }
-
-  /* =========================================================
-     6. SUCHFELD im Topbar: rund + hell, wie "Suche" im metergrid-Portal
-     ========================================================= */
-  header[role="banner"] input[type="search"],
-  header[role="banner"] input[placeholder*="Such" i],
-  header[role="banner"] input[placeholder*="search" i] {
-    border-radius: 20px !important;
-    background-color: rgba(255, 255, 255, 0.12) !important;
-    border: none !important;
-    color: #ffffff !important;
   }
 
 } /* Ende @-moz-document */

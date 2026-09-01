@@ -2,17 +2,20 @@
 
 Stylus-Userstyle, das HubSpot im Corporate Design des metergrid Mieterstromportals einfärbt (Navy/Blau statt HubSpot-Standard Schwarz/Orange).
 
-## Farb-Mapping
+## Struktur (v2)
 
-Werte per Pixel-Sampling aus Screenshots des metergrid-Portals und des HubSpot-Ist-Zustands extrahiert.
+Zeilenweises Pixel-Sampling der metergrid-Sidebar ergab: nur das obere Logo/Such-Band ist Navy — die eigentliche Nav-Liste darunter ist **weiß**, mit grauem Text für inaktive Einträge und einer blauen Pille nur für den aktiven Eintrag. v1 hatte fälschlich die gesamte Sidebar navy + Linktext blau gesetzt, was (wo die Navy-Regel nicht griff) zu blauer Schrift auf HubSpots dunkelgrauem Standardhintergrund führte — schlechter Kontrast. v2 bildet die reale Struktur ab:
 
-| Element | HubSpot-Standard | metergrid CI/CD |
-|---|---|---|
-| Topbar / Sidebar | `#333333` | `#002c96` |
-| Primär-Buttons / Links | `#fb4f20` / `#1d70de` | `#005edf` |
-| Hover / sekundäre Flächen | – | `#264ca6` |
-| Seiten-Hintergrund | `#ffffff` / `#f0f0f0` | `#f7f9fc` |
-| Erfolg-Badges | HubSpot-Grün | `#e0faf2` (Mint) auf Navy-Text |
+| HubSpot-Element | Wird zu |
+|---|---|
+| Top-Bar (volle Breite, oben) | Navy `#002c96`, weiße Schrift/Icons |
+| Icon-Rail links (CRM/Sales/…) | Weiß `#fcfdfe`, grauer Text (`#5d7182`) für inaktive Einträge |
+| Aktiver Nav-Eintrag | Blaue Pille `#005edf`, weißer Text |
+| Primär-Buttons | `#005edf`, Hover `#264ca6` |
+| Links im Content-Bereich | `#005edf` (nur `main`/`[role="main"]`, nicht Top-Bar/Rail) |
+| Seiten-Hintergrund | `#f7f9fc` |
+| Karten | `#fcfdfe` mit Rand `#e2e8f0` |
+| Erfolg-Badges | `#e0faf2` (Mint) auf Navy-Text |
 
 Rote/Warn-Badges (überfällige Zahlungen, Fehler) bleiben unverändert — analog zum metergrid-Portal, wo Statusfarben von der Markenfarbe getrennt sind.
 
