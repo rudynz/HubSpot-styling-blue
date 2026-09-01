@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           HubSpot – metergrid CI/CD
 @namespace      metergrid.de
-@version        4.0.0
+@version        5.0.0
 @description    Reskin des HubSpot-Portals im Corporate Design des metergrid Mieterstromportals.
 @author         claude@23r.de
 @preprocessor   default
@@ -14,231 +14,2780 @@
      (z.B. app-eu1.hubspot.com, app-na2.hubspot.com) - falls ja, die Regex
      unten unter @-moz-document ergänzen.
 
-  Farbherkunft: Werte per Pixel-Sampling aus den metergrid-Portal-
-  Screenshots extrahiert (input/Screenshot ... 11.35.36.png) sowie aus
-  Referenz-Screenshots eines älteren HubSpot-Designs, das als angenehmer
-  empfunden wurde. Beide Quellen reihenweise gescannt statt geraten.
+  ===========================================================
+  v5: DATENGETRIEBEN STATT GERATEN
+  ===========================================================
+  v1-v4 haben Selektoren von Hand geraten/aus Screenshots abgeleitet -
+  fehleranfällig, siehe Kontrastfehler in v1/v3. Für v5 wurde die frei
+  im Chrome Web Store verfügbare Extension "HubSpot Theme Changer"
+  (pjndnibpagckfdcechcpbmoelmeenljc) heruntergeladen und ihr Code
+  (JS-Dateien, clientseitig ohnehin einsehbar) analysiert. Sie deckte
+  zwei entscheidende Dinge auf:
 
-  DESIGNENTSCHEIDUNG v3 (gegenüber v2 korrigiert):
-  Das als "alt/angenehm" empfundene HubSpot-Design nutzt EIN durchgehendes
-  weiches Blaugrau (#394651) für Top-Bar UND komplette linke Icon-Rail als
-  eine Fläche - nicht HubSpots aktuelles hartes Schwarz. v2 hatte (aus der
-  metergrid-Website 1:1 übernommen) die Rail auf Weiß mit grauem Text
-  umgestellt. v3 übernimmt stattdessen die STRUKTUR des alten Designs
-  (durchgehende dunkle Fläche über Top-Bar + Rail) und ersetzt den Ton
-  durch metergrid-Navy (#002c96) statt Blaugrau/Schwarz:
+  1. HubSpot nutzt ein eigenes Design-Token-System ("Trellis") mit ca.
+     220 CSS-Custom-Properties (--trellis-color-*) auf :root bzw.
+     html[data-hubspot-theme]. Das Setzen dieser Variablen ist DEUTLICH
+     robuster als einzelne Komponenten-Klassen zu treffen, weil HubSpots
+     eigene Komponenten sie selbst konsumieren.
+  2. Als Fallback/Ergänzung für Komponenten, die (noch) nicht über Tokens
+     laufen, extrahiert die Extension reale, funktionierende Selektoren
+     (data-test-id, #hs-vertical-nav, #hs-global-toolbar, [class*="..."]
+     Styled-Components-Präfixe) für Dutzende HubSpot-Bereiche (CRM-
+     Tabellen, Dashboards, Help Desk, Academy, Report-Charts, etc.).
 
-    HubSpot Top-Bar + Icon-Rail (eine Fläche) -> durchgehend Navy
-      - inaktive Einträge: helle, aber gedämpfte Schrift/Icons (kein Blau!)
-      - aktiver Eintrag:   blaue Pille (#005edf), weißer Text
+  Die generierte metergrid-Palette wurde durch dieselbe Generator-Funktion
+  der Extension gejagt (siehe Commit-Historie), NICHT von Hand
+  abgeschrieben - das schließt Übertragungsfehler bei ~220 Variablen aus.
 
-  Der v1-Kontrastfehler (blaue Schrift auf dunkelgrauem Hintergrund, weil
-  die Navy-Regel nur teilweise griff) wird hier strukturell vermieden:
-  Text in der Rail ist immer HELL (nie die Linkfarbe #005edf), und der
-  Navy-Hintergrund wird über mehrere redundante Selektoren erzwungen statt
-  über einen einzigen unsicheren Treffer.
+  BEWUSST ENTFERNT: Die generischen Badge/Tag/Alert-Overrides der
+  Extension wurden gestrichen, weil sie ALLE Badges/Alerts (auch rote
+  Fehler-/Mahn-Badges) pauschal auf metergrid-Blau umgefärbt hätten -
+  das hätte die Status-Semantik zerstört (rot = überfällig/Fehler soll
+  rot bleiben, wie im metergrid-Portal selbst).
 
-  HubSpot rendert Teile der Navigation mit dynamisch gehashten Klassen-
-  namen. Selektoren setzen primär auf ARIA-Rollen/Landmarks + Tags
-  (stabiler) plus bekannte HubSpot-Klassen als Fallback. Falls ein
-  Element nicht greift, per DevTools (Rechtsklick -> Untersuchen) den
-  echten Klassennamen ablesen und ergänzen.
-
-  v4: Live-Feedback war, dass v3 wie der Graustufen-"Bedtime Mode" eines
-  Handys aussieht. Grund: nur die Rail trug Farbe, der komplette Content-
-  Bereich (Überschriften, Tabellen, Rahmen, Formular-Akzente) blieb
-  HubSpots neutrales Schwarz/Grau/Weiß - das wirkt wie ein Kontrastfilter,
-  nicht wie ein Markendesign. v4 zieht metergrid-Blau in den Content
-  rein: Überschriften in gedämpftem Navy statt Schwarz, sichtbar blau
-  getönter Seiten-Hintergrund/Rahmen/Tabellen-Header, Blau als
-  Formular-Akzentfarbe (Checkbox/Radio) statt HubSpot-Orange.
+  ACHTUNG - RESIDUALRISIKO: HubSpot hat kürzlich ein Redesign
+  durchgeführt; die Extension könnte an manchen Stellen nicht auf dem
+  neuesten Stand sein. Anhaltspunkte für Aktualität: Sie referenziert
+  bereits Copilot/Breeze-Selektoren (HubSpots aktuelle KI-Features,
+  die es erst seit dem neueren Design gibt) - das spricht für einen
+  aktuellen Stand, ist aber keine Garantie. Die ~220 CSS-Variablen
+  (Abschnitt :root) sind das robustere Fundament, weil sie unabhängig
+  von einzelnen Komponenten-Klassennamen wirken; falls einzelne
+  Klassen-basierte Selektoren (die [class*="..."]-Regeln) im Live-Portal
+  nicht mehr greifen, bitte per DevTools den aktuellen Klassennamen/
+  data-test-id ablesen und die betreffende Regel ergänzen/korrigieren.
 */
 
 @-moz-document regexp("https://(app|app-eu1|app-na1|app-na2)[a-z0-9-]*\.hubspot\.com/.*") {
 
-  :root {
-    /* --- metergrid CI/CD Palette --- */
-    --mg-navy: #002c96;       /* Top-Bar / Logo-Band */
-    --mg-blue: #005edf;       /* Primär-Buttons, aktive Pille, Links im Content */
-    --mg-blue-mid: #264ca6;   /* Such-Feld auf Navy, Hover-Flächen */
-    --mg-mint: #e0faf2;       /* helle Erfolg-/Badge-Hintergründe */
-    --mg-bg: #eef3fb;         /* Seiten-Hintergrund, sichtbar blau statt fast-weiß */
-    --mg-bg-soft: #fcfdfe;    /* Karten-Hintergrund (fast weiß) */
-    --mg-border: #cfdcf0;     /* Rahmen/Trennlinien, sichtbar blau statt neutral grau */
-    --mg-rail-text: #c9d4e8;  /* inaktive Schrift/Icons in der Rail (hell, NIE Blau) */
-    --mg-text: #1e2a4a;       /* Überschriften/Fließtext statt HubSpot-Schwarz/Grau */
-    --mg-white: #ffffff;
+  :root,
+  html,
+  html[data-hubspot-theme],
+  html[data-hubspot-theme="canvas-light"],
+  html[data-hubspot-theme="canvas-dark"] {
+    --trellis-color-fill-surface-default: #eef3fb !important;
+    --trellis-color-fill-surface-raised: #fcfdfe !important;
+    --trellis-color-fill-surface-recessed: #fcfdfe !important;
+    --trellis-color-fill-surface-overlay: #fcfdfe !important;
+    --trellis-color-fill-surface-default-hover: #fcfdfe !important;
+    --trellis-color-fill-surface-default-pressed: #e4edfa !important;
+    --trellis-color-fill-surface-recessed-hover: #fcfdfe !important;
+    --trellis-color-fill-surface-recessed-pressed: #e4edfa !important;
+    --trellis-color-text-core-default: #1e2a4a !important;
+    --trellis-color-text-core-subtle: #5d7182 !important;
+    --trellis-color-text-core-disabled: #9ca3af !important;
+    --trellis-color-text-core-on-fill-default: #ffffff !important;
+    --trellis-color-text-interactive-default: #005edf !important;
+    --trellis-color-text-interactive-default-hover: #264ca6 !important;
+    --trellis-color-text-interactive-default-pressed: #002c96 !important;
+    --trellis-color-text-interactive-default-disabled: #9ca3af !important;
+    --trellis-color-text-interactive-on-fill: #ffffff !important;
+    --trellis-color-text-interactive-on-fill-default: #ffffff !important;
+    --trellis-color-text-interactive-on-fill-hover: #ffffff !important;
+    --trellis-color-text-interactive-on-fill-pressed: #ffffff !important;
+    --trellis-color-text-interactive-on-fill-subtle: #264ca6 !important;
+    --trellis-color-specialty-text-core-alt-default: #1e2a4a !important;
+    --trellis-color-specialty-text-interactive-alt-default: #005edf !important;
+    --trellis-color-specialty-text-interactive-alt-hover: #264ca6 !important;
+    --trellis-color-specialty-text-interactive-alt-pressed: #002c96 !important;
+    --trellis-color-text-primary-default: #ffffff !important;
+    --trellis-color-text-primary-subtle: #ffffff !important;
+    --trellis-color-text-primary-disabled: #9ca3af !important;
+    --trellis-color-text-primary-on-fill-default: #ffffff !important;
+    --trellis-color-text-primary-on-fill-subtle: #5d7182 !important;
+    --trellis-color-text-secondary-default: #005edf !important;
+    --trellis-color-text-secondary-disabled: #9ca3af !important;
+    --trellis-color-text-tertiary-default: #5d7182 !important;
+    --trellis-color-text-tertiary-disabled: #9ca3af !important;
+    --trellis-color-text-inverse-default: #ffffff !important;
+    --trellis-color-text-inverse-default-alt: #1e2a4a !important;
+    --trellis-color-text-inverse-hover: #264ca6 !important;
+    --trellis-color-text-inverse-pressed: #ffffff !important;
+    --trellis-color-text-inverse-disabled: #9ca3af !important;
+    --trellis-color-text-inverse-disabled-alt: #9ca3af !important;
+    --trellis-color-text-brand-default: #005edf !important;
+    --trellis-color-text-brand-on-fill-default: #ffffff !important;
+    --trellis-color-text-brand-on-fill-subtle: #264ca6 !important;
+    --trellis-color-text-alert-default: #dc2626 !important;
+    --trellis-color-text-alert-hover: #b91c1c !important;
+    --trellis-color-text-alert-pressed: #991b1b !important;
+    --trellis-color-text-alert-on-fill: #ffffff !important;
+    --trellis-color-text-alert-on-fill-default: #ffffff !important;
+    --trellis-color-text-alert-on-fill-subtle: #b91c1c !important;
+    --trellis-color-text-positive-default: #002c96 !important;
+    --trellis-color-text-positive-on-fill-default: #ffffff !important;
+    --trellis-color-text-positive-on-fill-alt: #e0faf2 !important;
+    --trellis-color-text-positive-on-fill-subtle: #15803d !important;
+    --trellis-color-text-caution-default: #ca8a04 !important;
+    --trellis-color-text-caution-on-fill-default: #1F1F1F !important;
+    --trellis-color-text-caution-on-fill-alt: #fefce8 !important;
+    --trellis-color-text-caution-on-fill-subtle: #a16207 !important;
+    --trellis-color-text-info-default: #0284c7 !important;
+    --trellis-color-text-info-on-fill-default: #ffffff !important;
+    --trellis-color-text-info-on-fill-subtle: #0369a1 !important;
+    --trellis-color-border-core-default: #cfdcf0 !important;
+    --trellis-color-border-core-subtle: #e6edf7 !important;
+    --trellis-color-border-core-hover: #a9c3e8 !important;
+    --trellis-color-border-core-pressed: #a9c3e8 !important;
+    --trellis-color-border-core-disabled: #e6edf7 !important;
+    --trellis-color-border-core-subtle-hover: #cfdcf0 !important;
+    --trellis-color-border-core-subtle-pressed: #a9c3e8 !important;
+    --trellis-color-border-core-on-fill-default: #ffffff !important;
+    --trellis-color-border-primary-default: hsla(0,0%,8%,0) !important;
+    --trellis-color-border-primary-disabled: hsla(0,0%,8%,0) !important;
+    --trellis-color-border-primary-on-fill: #ffffff !important;
+    --trellis-color-border-primary-on-fill-default: #ffffff !important;
+    --trellis-color-border-primary-subtle: #a9c3e8 !important;
+    --trellis-color-border-primary-subtle-default: #a9c3e8 !important;
+    --trellis-color-border-primary-subtle-hover: #9ca3af !important;
+    --trellis-color-border-primary-subtle-pressed: #5d7182 !important;
+    --trellis-color-border-secondary-default: #005edf !important;
+    --trellis-color-border-secondary-default-alt: #005edf !important;
+    --trellis-color-border-secondary-disabled: transparent !important;
+    --trellis-color-border-tertiary-default: #a9c3e8 !important;
+    --trellis-color-border-tertiary-disabled: transparent !important;
+    --trellis-color-border-inverse-default: #ffffff !important;
+    --trellis-color-border-inverse-default-alt: #ffffff !important;
+    --trellis-color-border-inverse-disabled: hsla(0,0%,8%,0) !important;
+    --trellis-color-border-inverse-disabled-alt: hsla(0,0%,8%,0) !important;
+    --trellis-color-border-interactive-default: #005edf !important;
+    --trellis-color-border-interactive-pressed: #002c96 !important;
+    --trellis-color-border-brand-default: #005edf !important;
+    --trellis-color-border-surface-default: #cfdcf0 !important;
+    --trellis-color-fill-field-default: #ffffff !important;
+    --trellis-color-fill-field-default-alt: #eef3fb !important;
+    --trellis-color-fill-field-hover: #e4edfa !important;
+    --trellis-color-fill-field-pressed: #e4edfa !important;
+    --trellis-color-fill-field-disabled: #fcfdfe !important;
+    --trellis-color-fill-primary-default: #005edf !important;
+    --trellis-color-fill-primary-hover: #264ca6 !important;
+    --trellis-color-fill-primary-pressed: #002c96 !important;
+    --trellis-color-fill-primary-disabled: #e4edfa !important;
+    --trellis-color-fill-primary-subtle: #fcfdfe !important;
+    --trellis-color-fill-secondary-default: #ffffff !important;
+    --trellis-color-fill-secondary-default-alt: #eef3fb !important;
+    --trellis-color-fill-secondary-hover: #e4edfa !important;
+    --trellis-color-fill-secondary-hover-alt: #e4edfa !important;
+    --trellis-color-fill-secondary-pressed: #005edf !important;
+    --trellis-color-fill-secondary-pressed-alt: #005edf !important;
+    --trellis-color-fill-secondary-disabled: #fcfdfe !important;
+    --trellis-color-fill-secondary-disabled-alt: #fcfdfe !important;
+    --trellis-color-fill-secondary-subtle: #eef3fb !important;
+    --trellis-color-fill-tertiary-default: #fcfdfe !important;
+    --trellis-color-fill-tertiary-hover: #e4edfa !important;
+    --trellis-color-fill-tertiary-pressed: #005edf !important;
+    --trellis-color-fill-tertiary-disabled: #fcfdfe !important;
+    --trellis-color-fill-tertiary-alt: #eef3fb !important;
+    --trellis-color-fill-tertiary-subtle: #eef3fb !important;
+    --trellis-color-fill-transparent-default: transparent !important;
+    --trellis-color-fill-transparent-hover: rgba(255, 255, 255, 0.1) !important;
+    --trellis-color-fill-transparent-pressed: rgba(255, 255, 255, 0.15) !important;
+    --trellis-color-fill-transparent-disabled: #fcfdfe !important;
+    --trellis-color-fill-inverse-default: hsla(0,0%,8%,0) !important;
+    --trellis-color-fill-inverse-default-alt: #ffffff !important;
+    --trellis-color-fill-inverse-hover: hsla(0,0%,100%,.08) !important;
+    --trellis-color-fill-inverse-hover-alt: #ffffff !important;
+    --trellis-color-fill-inverse-pressed: hsla(0,0%,100%,.11) !important;
+    --trellis-color-fill-inverse-pressed-alt: #ffffff !important;
+    --trellis-color-fill-inverse-disabled: #fcfdfe !important;
+    --trellis-color-fill-inverse-disabled-alt: #fcfdfe !important;
+    --trellis-color-fill-inverse-subtle: #005edf !important;
+    --trellis-color-fill-brand-default: #005edf !important;
+    --trellis-color-fill-brand-hover: #264ca6 !important;
+    --trellis-color-fill-brand-pressed: #002c96 !important;
+    --trellis-color-fill-brand-subtle: #e6f0fd !important;
+    --trellis-color-fill-alert-default: #dc2626 !important;
+    --trellis-color-fill-alert-hover: #b91c1c !important;
+    --trellis-color-fill-alert-pressed: #991b1b !important;
+    --trellis-color-fill-alert-subtle: #fef2f2 !important;
+    --trellis-color-fill-positive-default: #16a34a !important;
+    --trellis-color-fill-positive-hover: #15803d !important;
+    --trellis-color-fill-positive-pressed: #166534 !important;
+    --trellis-color-fill-positive-subtle: #e0faf2 !important;
+    --trellis-color-fill-caution-default: #ca8a04 !important;
+    --trellis-color-fill-caution-hover: #a16207 !important;
+    --trellis-color-fill-caution-pressed: #854d0e !important;
+    --trellis-color-fill-caution-subtle: #fefce8 !important;
+    --trellis-color-fill-info-default: #0284c7 !important;
+    --trellis-color-fill-info-hover: #0369a1 !important;
+    --trellis-color-fill-info-pressed: #075985 !important;
+    --trellis-color-fill-info-subtle: #f0f9ff !important;
+    --trellis-color-icon-core-default: #5d7182 !important;
+    --trellis-color-icon-core-subtle: #9ca3af !important;
+    --trellis-color-icon-core-disabled: #a9c3e8 !important;
+    --trellis-color-icon-core-on-fill-default: #ffffff !important;
+    --trellis-color-icon-primary-default: #ffffff !important;
+    --trellis-color-icon-primary-hover: #ffffff !important;
+    --trellis-color-icon-primary-pressed: #ffffff !important;
+    --trellis-color-icon-primary-disabled: #9ca3af !important;
+    --trellis-color-icon-primary-on-fill-default: #ffffff !important;
+    --trellis-color-icon-secondary-default: #005edf !important;
+    --trellis-color-icon-secondary-subtle: #ffffff !important;
+    --trellis-color-icon-secondary-disabled: #9ca3af !important;
+    --trellis-color-icon-tertiary-default: #5d7182 !important;
+    --trellis-color-icon-tertiary-disabled: #9ca3af !important;
+    --trellis-color-icon-inverse-default: #ffffff !important;
+    --trellis-color-icon-inverse-default-alt: #1e2a4a !important;
+    --trellis-color-icon-inverse-hover: #264ca6 !important;
+    --trellis-color-icon-inverse-pressed: #ffffff !important;
+    --trellis-color-icon-inverse-disabled: #9ca3af !important;
+    --trellis-color-icon-interactive-default: #005edf !important;
+    --trellis-color-icon-interactive-hover: #264ca6 !important;
+    --trellis-color-icon-interactive-pressed: #002c96 !important;
+    --trellis-color-icon-interactive-disabled: #9ca3af !important;
+    --trellis-color-icon-interactive-on-fill-default: #ffffff !important;
+    --trellis-color-icon-brand-default: #264ca6 !important;
+    --trellis-color-icon-brand-on-fill-default: #e6f0fd !important;
+    --trellis-color-icon-alert-default: #dc2626 !important;
+    --trellis-color-icon-alert-hover: #b91c1c !important;
+    --trellis-color-icon-alert-pressed: #991b1b !important;
+    --trellis-color-icon-alert-on-fill-default: #ffffff !important;
+    --trellis-color-icon-positive-default: #002c96 !important;
+    --trellis-color-icon-positive-on-fill-default: #ffffff !important;
+    --trellis-color-icon-caution-default: #ca8a04 !important;
+    --trellis-color-icon-caution-on-fill-default: #1F1F1F !important;
+    --trellis-color-icon-info-default: #0284c7 !important;
+    --trellis-color-icon-info-on-fill-default: #ffffff !important;
+    --trellis-color-specialty-table-header-default: #eef3fb !important;
+    --trellis-color-specialty-table-header-hover: #e4edfa !important;
+    --trellis-color-specialty-table-header-pressed: #005edf !important;
+    --trellis-color-specialty-table-zebra-stripe-default: #ffffff !important;
+    --trellis-color-specialty-link-on-fill-default: #ffffff !important;
+    --trellis-color-specialty-link-on-fill-hover: #264ca6 !important;
+    --trellis-color-specialty-link-on-fill-pressed: #ffffff !important;
+    --trellis-color-specialty-link-on-fill-disabled: #9ca3af !important;
+    --trellis-color-specialty-scrim: rgba(0, 0, 0, 0.7) !important;
+    --trellis-color-specialty-scrim-alt: rgba(0, 0, 0, 0.5) !important;
+    --trellis-color-global-shell-fill-surface-default: #eef3fb !important;
+    --trellis-color-global-shell-fill-surface-panel-default: #002c96 !important;
+    --trellis-color-global-shell-fill-nav-item-default: transparent !important;
+    --trellis-color-global-shell-fill-nav-item-hover: #e4edfa !important;
+    --trellis-color-global-shell-fill-nav-item-selected: #005edf !important;
+    --trellis-color-global-shell-fill-sub-nav-item-default: transparent !important;
+    --trellis-color-global-shell-fill-sub-nav-item-hover: #e4edfa !important;
+    --trellis-color-global-shell-fill-sub-nav-item-selected: #005edf !important;
+    --trellis-color-global-shell-fill-search-default: #ffffff !important;
+    --trellis-color-global-shell-fill-search-hover: #e4edfa !important;
+    --trellis-color-global-shell-fill-logo-default: #005edf !important;
+    --trellis-color-global-shell-text-nav-item-default: #c9d4e8 !important;
+    --trellis-color-global-shell-text-nav-item-hover: #ffffff !important;
+    --trellis-color-global-shell-text-nav-item-selected: #ffffff !important;
+    --trellis-color-global-shell-icon-nav-item-default: #c9d4e8 !important;
+    --trellis-color-global-shell-icon-nav-item-hover: #ffffff !important;
+    --trellis-color-global-shell-icon-nav-item-selected: #ffffff !important;
+    --trellis-color-global-shell-icon-nav-item-subtle: #5d7182 !important;
+    --trellis-color-global-shell-border-default: #cfdcf0 !important;
+    --trellis-color-global-shell-border-dark: #e6edf7 !important;
+    --trellis-color-global-shell-border-subtle: #a9c3e8 !important;
+    --trellis-color-fill-transitional-table-default: #eef3fb !important;
+    --trellis-color-fill-transitional-tabs-default: #fcfdfe !important;
+    --trellis-color-fill-transitional-tabs-pressed: #e4edfa !important;
+    --trellis-color-fill-transitional-popover: #ffffff !important;
+    --trellis-color-fill-transitional-shadow: rgba(0, 0, 0, 0.5) !important;
+    --view-tabs-inactive-bg-color: #fcfdfe !important;
+    --data-agent-background-color-light: #fcfdfe !important;
   }
 
+    /* V2 Data-Driven Theme Overrides */
+    
+    /* GLOBAL TOOLBAR - data-test-id selectors from extraction */
+    [data-test-id="hs-global-toolbar"] {
+      background-color: #002c96 !important;
+    }
+    
+    [data-test-id="hs-vertical-nav"] {
+      background-color: #002c96 !important;
+    }
+    
+    [data-test-id="global-search-input-react"] {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+    
+    form#hs-search-react,
+    [class*="StyledSearchForm"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* NAVIGATION ICONS */
+    [data-test-id^="vertical-nav-icon__"] {
+      fill: #c9d4e8 !important;
+    }
+    
+    [data-test-id="nav-favorite-icon"] {
+      fill: #c9d4e8 !important;
+    }
+    
+    [data-location="global-toolbar"],
+    [data-location="vertical-nav"],
+    i18n-string,
+span
+{
+      color: #1e2a4a !important;
+    }
+
+    [class*="DialogHeader__StyledHeaderInner"],
+    [class*="SidebarContainer"],
+    [class*="ListeningStreamsTypeSidebar"],
+    [class*="ViewerRelatedConditions__StyledConditionContentBox"],
+    [class*="ReturnExperience__CenterBreakpoint"]
+{
+      background-color: #eef3fb !important
+}
+
+    [class*="InboxContainer"]{
+      background-color: transparent !important;
+}
+
+    [data-location="global-toolbar"]:hover,
+    [data-location="vertical-nav"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* COPILOT SIDEBAR */
+
+    [class*="BranchLabel__StyledBranchLabelBody"],
+    aside.copilot-sidebar-container {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* PAGE TEMPLATES */
+    [class*="AbstractPageTemplate__StyledPage"],
+    [class*="AbstractPageTemplate__"],
+    [class*="AbstractPageSection__StyledSection"],
+    [class*="PageSection__"],
+    [class*="AbstractPageGridContent__Outer"] {
+      background-color: #eef3fb !important;
+    }
+    
+    main, [role="main"], [class*="PageContent"], [class*="MainContent"], [class*="ContentArea"] {
+      background-color: #eef3fb !important;
+    }
+    
+    body {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* VERTICAL NAV */
+    #hs-vertical-nav,
+    [class*="VerticalNavContainer__VNCMask"],
+    [class*="VerticalNavContainer__VNCContent"],
+    [class*="VerticalNavContainer__VNCMain"],
+    [class*="VerticalNavContainer__VNCFooter"] {
+      background-color: #002c96 !important;
+    }
+    
+    [class*="VerticalNavMenuItem__Li"],
+    #hs-vertical-nav [role="menuitem"] {
+      background-color: transparent !important;
+      color: #c9d4e8 !important;
+    }
+    
+    #hs-vertical-nav button[role="menuitem"],
+    #hs-vertical-nav a[role="menuitem"] {
+      color: #c9d4e8 !important;
+      background-color: transparent !important;
+    }
+    
+    #hs-vertical-nav [role="menuitem"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    #hs-vertical-nav svg, #hs-vertical-nav svg path {
+      fill: #c9d4e8 !important;
+    }
+    
+    #hs-vertical-nav [role="menuitem"]:hover svg,
+    #hs-vertical-nav [role="menuitem"]:hover svg path {
+      fill: #ffffff !important;
+    }
+    
+    /* GLOBAL TOOLBAR */
+    #hs-global-toolbar,
+    [class*="GlobalToolbarHeader__StyledHeader"] {
+      background-color: #002c96 !important;
+    }
+    
+    [class*="Header__Outer"], [class*="Header__InnerWrapper"], [class*="Header__"] {
+      background-color: transparent !important;
+    }
+    
+    [class*="GlobalToolbarItem__StyledListItem"] > button:hover,
+    [class*="GlobalToolbarItem__StyledListItem"] > a:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* CARDS */
+    [class*="SelectableBox"], [class*="Card__"], [class*="Panel__"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [class*="Tile__StyledTile"], [class*="CardWrapper__Outer"], [class*="CardSection__StyledCardSection"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id="ecosystem-app-card"], [data-test-id="ecosystem-app-card"] > div {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id="ecosystem-app-card"]:hover, [class*="CardWrapper__Outer"]:hover {
+      background-color: #eef3fb !important;
+      border-color: #a9c3e8 !important;
+    }
+    
+    /* MODALS & POPUPS */
+    [class*="Modal__"], [role="dialog"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [class*="Popover__"], [class*="Dropdown__"], [class*="Menu__"], [role="menu"], [role="listbox"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* TABLES */
+    table, [class*="Table__"], [class*="DataTable"], [role="grid"], [role="table"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    table thead th, [class*="Table__"] thead th, th, thead, thead tr {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    tbody, tr, td {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    tbody tr:hover td, tbody tr:hover th, [class*="RowComponent__StyledRowComponent"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="IndexTableContainer"], [class*="TableWrapper"], [class*="TableContainer"], [class*="ListContainer"] {
+      background-color: #ffffff !important;
+    }
+    
+    [data-test-id="table-top-bar"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* INPUTS */
+    input, textarea, select, [class*="Input__"], [class*="TextArea__"], [class*="Select__"],
+    [role="textbox"], [role="searchbox"], [role="combobox"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: #9ca3af !important;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      border-color: #005edf !important;
+    }
+    
+    [class*="SearchInput__Wrapper"], [class*="SearchInputWrapper"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [role="search"], [role="search"] input {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* BUTTONS */
+    [class*="PrivateButton__StyledButton"][data-button-use="tertiary-light"],
+    [class*="PrivateButton__StyledButton"][data-button-use="tertiary-extra-light"],
+    [class*="PrivateButton__StyledButton"][data-button-use="secondary"],
+    [class*="PrivateButton__StyledButton"][data-button-use="form"],
+    [class*="PrivateButton__StyledButton"][data-button-use="transparent"],
+    [class*="PrivateButton__StyledButton"][data-button-use="primary-white"],
+    [class*="PrivateButton__StyledButton"][data-button-use="tertiary"] {
+      background-color: #ffffff !important;
+      color: #005edf !important;
+      border-color: #005edf !important;
+    }
+    
+    [class*="PrivateButton__StyledButton"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    
+    [class*="PrivateButtonLink__StyledButtonLink"] {
+      color: #005edf !important;
+      background-color: transparent !important;
+    }
+    
+    [class*="PrivateButtonLink__StyledButtonLink"]:hover {
+      color: #264ca6 !important;
+    }
+    
+    
+    /* TABS */
+    [role="tablist"] {
+      background-color: #eef3fb !important;
+    }
+    
+    [role="tablist"] button {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    [class*="Tabs__StyledTabs"], [class*="Tabs__StyledWrapper"], [class*="Tabs__StyledList"] {
+      background-color: #eef3fb !important;
+    }
+    
+    [class*="TabComponent-"], [class*="ViewTab__StyledTabComponent"], [class*="ViewTab__"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-tab-link="true"] {
+      color: #5d7182 !important;
+      background-color: transparent !important;
+    }
+    
+    [data-tab-link="true"]:hover {
+      color: #1e2a4a !important;
+      background-color: #e4edfa !important;
+    }
+    
+    [data-tab-link="true"][data-tab-selected="true"],
+    [data-tab-link="true"][aria-current="page"] {
+      color: #005edf !important;
+    }
+    
+    /* TEXT & LINKS */
+    h1, h2, h3, h4, h5, h6, [class*="Heading__"], [class*="Title__"] {
+      color: #1e2a4a !important;
+    }
+    
+    a:not([role="button"]) {
+      color: #005edf !important;
+    }
+    
+    a:not([role="button"]):hover {
+      color: #264ca6 !important;
+    }
+    
+    [class*="Text__StyledText"], [class*="Text__TextElement"] {
+      color: #1e2a4a !important;
+    }
+    
+    [data-link-use="dark"][class*="Link__StyledLink"] {
+      color: #005edf !important;
+    }
+    
+    [data-link-use="dark"][class*="Link__StyledLink"]:hover {
+      color: #264ca6 !important;
+    }
+    
+    /* BORDERS */
+    [class*="Border__"], [class*="Divider__"], hr, [class*="HR__StyledHR"] {
+      border-color: #cfdcf0 !important;
+      background-color: #cfdcf0 !important;
+    }
+    
+    /* MENUS */
+    #accounts-menu-content, [class*="MenuButton__StyledMenu"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    #accounts-menu-content > li, #accounts-menu-content [role="menuitem"],
+    [class*="MenuButton__StyledMenu"] > li, [class*="MenuButton__StyledMenu"] [role="menuitem"] {
+      background-color: #ffffff !important;
+    }
+    
+    #accounts-menu-content > li:hover, #accounts-menu-content [role="menuitem"]:hover,
+    [class*="MenuButton__StyledMenu"] > li:hover, [class*="MenuButton__StyledMenu"] [role="menuitem"]:hover,
+    [role="menuitem"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="MenuItem__StyledLink"] {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* SETTINGS SIDEBAR */
+    [class*="SidebarPage__SidebarInner"], [class*="SettingsPage__StyledDiv"],
+    [class*="AbstractPageGridContent__Sidebar"] {
+      background-color: #eef3fb !important;
+    }
+    
+    [class*="SideNavItem__StyledCustomLink"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="SideNavItem__StyledCustomLink"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="SideNavItem__StyledCustomLink"][aria-current="true"] {
+      background-color: #fcfdfe !important;
+      color: #005edf !important;
+    }
+    
+    /* CHECKBOXES */
+    [class*="Checkbox__CheckboxIndicator"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [class*="CheckboxCell"], [class*="CheckboxCell__"] {
+      background-color: #ffffff !important;
+    }
+    
+    /* TYPEAHEAD */
+    [class*="TypeaheadResultsItem__StyledItem"] {
+      background-color: transparent !important;
+    }
+    
+    [class*="TypeaheadResultsItem__StyledItem"]:hover,
+    [class*="TypeaheadResultsItem__StyledItem"][aria-selected="true"] {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="TypeaheadResultsItem__StyledContentWrapper"],
+    [class*="TypeaheadResultsItem__StyledContentLabel"],
+    [data-option-text="true"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="TypeaheadSearch__StyledTypeaheadSearch"] {
+      background-color: #ffffff !important;
+    }
+    
+    /* PROGRESS */
+    [class*="ProgressBar__ProgressBarWrapper"], [class*="Progress__ProgressWrapper"] {
+      background-color: #e6edf7 !important;
+    }
+    
+    [class*="Progress__ProgressBar"] {
+      background-color: #005edf !important;
+    }
+    
+    /* TOOLTIP */
+    [class*="ArrowContainer__StyledDiv"] {
+      background-color: #1e2a4a !important;
+      color: #ffffff !important;
+    }
+    
+    
+    /* AVATAR */
+    [class*="AvatarContentWrapper__AvatarContentHolder"] {
+      background-color: #e4edfa !important;
+    }
+    
+    /* MISC WRAPPERS */
+    [class*="TFlex__StyledFlex"], [class*="Flex__FlexWrapper"], [class*="Flex__StyledFlex"],
+    [class*="View__"] > div, [class*="Content__Wrapper"], [class*="ContentWrapper"] {
+      background-color: transparent !important;
+    }
+    
+    /* FILTERS */
+    [class*="FilterButton"], [class*="QuickFilter"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [class*="FilterDropdown"], [class*="FilterMenu"], [class*="FilterPopover"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* PAGINATION */
+    nav[aria-label*="Pagination"], nav[aria-label*="Pagination"] button {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    nav[aria-label="Pagination"] [class*="PrivateButton__StyledButton"] {
+      border: none !important;
+      background-color: transparent !important;
+    }
+    
+    nav[aria-label="Pagination"] [class*="PrivateButton__StyledButton"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* COPILOT */
+    .copilot-app-container {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* SCROLLBARS */
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: #eef3fb; }
+    ::-webkit-scrollbar-thumb { background: #e4edfa; border-radius: 6px; border: 2px solid #eef3fb; }
+    ::-webkit-scrollbar-thumb:hover { background: #005edf; }
+    ::-webkit-scrollbar-corner { background: #eef3fb; }
+    * { scrollbar-color: #e4edfa #eef3fb; }
+    
+    [class*="Overhang__StyledOverhang"], [class*="ScrollOverhang"], [class*="scroll-shadow"], [class*="ScrollShadow"] {
+      box-shadow: none !important;
+      background: transparent !important;
+      background-image: none !important;
+    }
+    
+    /* ============================================
+       HIGHCHARTS / CHARTS THEMING
+       ============================================ */
+    
+    /* Chart container and background */
+    svg.highcharts-root {
+      background-color: #fcfdfe !important;
+    }
+    
+    rect.highcharts-background {
+      fill: #fcfdfe !important;
+    }
+    
+    /* Axes */
+    .highcharts-axis-line,
+    path.highcharts-axis-line {
+      stroke: #cfdcf0 !important;
+    }
+    
+    .highcharts-grid-line,
+    path.highcharts-grid-line {
+      stroke: #e6edf7 !important;
+    }
+    
+    /* Axis labels and titles */
+    .highcharts-axis-labels text,
+    .highcharts-xaxis-labels text,
+    .highcharts-yaxis-labels text,
+    text.highcharts-axis-title,
+    g.highcharts-axis-labels text {
+      fill: #5d7182 !important;
+      color: #5d7182 !important;
+    }
+    
+    /* Legend */
+    .highcharts-legend text,
+    g.highcharts-legend text,
+    .highcharts-legend-item text {
+      fill: #1e2a4a !important;
+      color: #1e2a4a !important;
+    }
+    
+    .highcharts-legend-box {
+      fill: #fcfdfe !important;
+      stroke: #cfdcf0 !important;
+    }
+    
+    /* Data labels */
+    .highcharts-data-label text,
+    g.highcharts-data-labels text,
+    .highcharts-data-label-box {
+      fill: #1e2a4a !important;
+      color: #1e2a4a !important;
+    }
+    
+    tspan.highcharts-text-outline {
+      stroke: #fcfdfe !important;
+      fill: #fcfdfe !important;
+    }
+    
+    /* Tooltip */
+    .highcharts-tooltip-box {
+      fill: #1e2a4a !important;
+      stroke: #cfdcf0 !important;
+    }
+    
+    .highcharts-tooltip text,
+    .highcharts-tooltip tspan {
+      fill: #ffffff !important;
+      color: #ffffff !important;
+    }
+    
+    /* Legend navigation */
+    .highcharts-legend-nav-active {
+      fill: #005edf !important;
+    }
+    
+    .highcharts-legend-nav-inactive {
+      fill: #9ca3af !important;
+    }
+    
+    text.highcharts-legend-navigation {
+      fill: #5d7182 !important;
+    }
+    
+    /* Chart end markers */
+    div[id^="highcharts-end-of-chart-marker"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* ============================================
+       REACT FLOW (DATA MODEL OVERVIEW) THEMING
+       ============================================ */
+    
+    /* Flow container */
+    [data-test-id="react-flow-wrapper"],
+    .dmo-graph-container {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Nodes */
+    [data-test-id^="node-bg-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id^="card-wrapper-node-"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id^="card-wrapper-node-"]:hover {
+      background-color: #eef3fb !important;
+      border-color: #a9c3e8 !important;
+    }
+    
+    /* Node color blocks */
+    [data-test-id="color-block"] {
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Edges */
+    .react-flow__edge path,
+    path.react-flow__edge-path {
+      stroke: #cfdcf0 !important;
+    }
+    
+    .react-flow__edge:hover path {
+      stroke: #005edf !important;
+    }
+    
+    /* Handles */
+    .react-flow__handle {
+      background-color: #e4edfa !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    .react-flow__handle.connectable:hover {
+      background-color: #005edf !important;
+    }
+    
+    /* Controls */
+    .react-flow__controls,
+    [data-testid="rf__controls"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    .react-flow__controls button {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    .react-flow__controls button:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* Mini map */
+    .react-flow__minimap {
+      background-color: #fcfdfe !important;
+    }
+    
+    /* Truncated text in nodes */
+    [data-test-id="truncated-text"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* Tour/intro modal */
+    [data-test-id="tour-intro-modal"],
+    [data-component-name="ModalDialog"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+
+    [class*="DialogBody__StyledDialogBody"]{
+      background-color: transparent !important;
+    }
+
+    [class*="AbstractDeviceFrame__StyledDisplayWrapper"]{
+      background-color: white !important;
+}
+    
+    /* ============================================
+       HELP DESK THEMING
+       ============================================ */
+    
+    /* Main layout */
+    [data-test-id="dash-left"],
+    [data-test-id="dash-right"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Thread history */
+    .ThreadHistoryWrapper-hCBekJ,
+    [class*="ThreadHistoryWrapper-"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Message content */
+    [data-test-id="primary-message-content-wrapper"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Metadata editor */
+    [data-test-id="metadata-editor-wrapper"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Channel label */
+    [data-test-id="selected-channel-label"] {
+      color: #5d7182 !important;
+    }
+    
+    /* Reply history toggle */
+    [data-test-id="InsertableReplyHistoryToggleButton"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Prosemirror editor menu */
+    .ProsemirrorMenu__StyledWrapper-kaA-DfX,
+    [class*="ProsemirrorMenu__StyledWrapper-"],
+    .prosemirror-controls {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Ticket sidebar */
+    [data-onboarding="help-desk-ticket-sidebar-wrapper"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Help desk nav sidebar */
+    [data-test-id="nav-sidebar"] {
+      background-color: #002c96 !important;
+    }
+    
+    /* Help desk search */
+    [data-test-id="help-desk-search-input"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Agent status indicator */
+    [data-test-id="agent-status-available-indicator"] {
+      background-color: #16a34a !important;
+    }
+    
+    /* Note banner */
+    [data-alert-type="info"].alert-dismissable {
+      background-color: #f0f9ff !important;
+      border-color: #0284c7 !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* ============================================
+       DASHBOARD WIDGET THEMING
+       ============================================ */
+    
+    /* Dashboard container */
+    [data-test-id="dashboard-container"],
+    [data-scroll-container="dashboard-container"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Dashboard page */
+    [data-test-id="dashboard-page"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Page header */
+    [data-test-id="page-header"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Dashboard widgets */
+    [data-test-id="dashboard-widget"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Report cards */
+    [data-test-id="report-card-v2--card-wrapper"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Date range labels */
+    [data-test-id="inline-date-range-and-frequency-label"] {
+      color: #5d7182 !important;
+    }
+    
+    /* Expandable sidebar */
+    [data-test-id="expandable-sidebar"],
+    [data-test-id="floating-sidebar"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Drag handle icon */
+    [data-test-id="drag-and-drop-icon"] {
+      color: #5d7182 !important;
+    }
+    
+    /* Data quality dashboard */
+    [data-test-id="properties-dashboard-card"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* ============================================
+       ACADEMY / LEARNING CENTER THEMING
+       ============================================ */
+    
+    /* Abstract page template header */
+    [data-test-id="abstract-page-template-header"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Learning content cards */
+    [data-test-id="learning-content-card"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+      color: #1e2a4a !important;
+    }
+    
+    [data-test-id="learning-content-card"]:hover {
+      background-color: #eef3fb !important;
+      border-color: #a9c3e8 !important;
+    }
+    
+    /* Lesson navigator */
+    [data-test-id="lesson-navigator-container"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Sidebar navigator */
+    #sidebarNavigator {
+      background-color: #fcfdfe !important;
+    }
+    
+    /* Grow recommendations card */
+    [data-test-id="grow-recommendations-card-wrapper"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Step icons */
+    [data-test-id="step-icon"] {
+      background-color: #e4edfa !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id="step-icon"][data-is-completed="true"] {
+      background-color: #e0faf2 !important;
+      border-color: #16a34a !important;
+    }
+    
+    [data-test-id="step-icon"][data-is-active="true"] {
+      background-color: #005edf !important;
+      border-color: #264ca6 !important;
+    }
+    
+    /* Filter type search */
+    [data-test-id="filter-type-search"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Colored sections */
+    .colored-section,
+    .banner--top {
+      background-color: #fcfdfe !important;
+    }
+    
+    /* ============================================
+       MARKETPLACE / STOREFRONT THEMING
+       ============================================ */
+    
+    /* Storefront header */
+    [data-test-id="storefront-header"] {
+      background-color: #002c96 !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Storefront search */
+    [data-test-id="storefront-search-bar"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Main section */
+    .MainSection-fsVwSg,
+    [class*="MainSection-"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Connected apps container */
+    [data-test-id="connected-apps-ui-container"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Connected apps table */
+    [data-test-id="connected-apps-table"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id="app-column-header"],
+    [data-test-id="status-column-header"],
+    [data-test-id="installed-date-column-header"],
+    [data-test-id="installed-by-column-header"],
+    [data-test-id="last-activity-column-header"],
+    [data-test-id="actions-column-header"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    [data-test-id="app-connections-user-cell"] {
+      background-color: #ffffff !important;
+    }
+    
+    /* ============================================
+       CRM FRAMEWORK TABLE THEMING
+       ============================================ */
+    
+    /* Framework data table */
+    [data-test-id="framework-data-table"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* CRM table cells */
+    [data-test-id="crm-table-cell"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id="crm-table-cell"][data-test-hover-cell="true"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* CRM listing filter bar */
+    [data-test-id="crm-listing-filter-bar"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* CRM listing search input */
+    [data-test-id="crm-listing-search-input"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Table top bar */
+    [data-test-id="table-top-bar"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* View tabs DnD */
+    [data-test-id="view-tabs-dnd-v2"] {
+      background-color: #eef3fb !important;
+    }
+    
+    [data-test-id^="view-tab-"],
+    [data-onboarding="view-tab"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-test-id^="view-tab-"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* Checkbox select all */
+    [data-test-id="checkbox-select-all-container"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Header components */
+    [data-test-id="header-component"],
+    [data-test-id="header-component-with-help-text"],
+    [data-test-id="multiline-header-component"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* CRM listing table cells */
+    [data-test-id="crm-listing-table-cell"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* Folder tabs */
+    [data-test-id="crm-listing-folder-tab"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* ============================================
+       SVG ICON UNIVERSAL THEMING
+       ============================================ */
+    
+    /* All styled icons */
+    svg[data-icon-name].StyledIcon-jibXlG,
+    svg[class*="StyledIcon-"] {
+      fill: #5d7182 !important;
+      color: #5d7182 !important;
+    }
+    
+    /* Icons in buttons - inherit button color */
+    button svg[data-icon-name],
+    [role="button"] svg[data-icon-name] {
+      fill: currentColor !important;
+      color: currentColor !important;
+    }
+    
+    /* Icons on hover */
+    button:hover svg[data-icon-name],
+    [role="button"]:hover svg[data-icon-name],
+    a:hover svg[data-icon-name] {
+      fill: #1e2a4a !important;
+    }
+    
+    /* Navigation icons (override general) */
+    #hs-vertical-nav svg[data-icon-name],
+    [data-test-id="hs-vertical-nav"] svg[data-icon-name] {
+      fill: #c9d4e8 !important;
+    }
+    
+    /* Interactive/link icons */
+    a svg[data-icon-name],
+    [data-link-use] svg[data-icon-name] {
+      fill: #005edf !important;
+    }
+    
+    /* Status icons */
+    svg[data-icon-name="Success"] {
+      fill: #16a34a !important;
+    }
+    
+    svg[data-icon-name="Info"] {
+      fill: #0284c7 !important;
+    }
+    
+    svg[data-icon-name="Favorite"] {
+      fill: #005edf !important;
+    }
+    
+    /* SVG data name icons */
+    svg[data-svg-name] {
+      fill: #5d7182 !important;
+    }
+    
+    /* Specific icon paths that need fill */
+    svg[data-icon-name] path,
+    svg[class*="StyledIcon-"] path {
+      fill: inherit !important;
+    }
+    
+    /* Polygon elements in icons */
+    svg polygon {
+      fill: #5d7182 !important;
+    }
+    
+    /* ============================================
+       ADDITIONAL COMPONENT THEMING
+       ============================================ */
+    
+    /* Brand kit and brand voice cards */
+    [data-test-id="brand-kit-overview-card"],
+    [data-test-id="brand-voice-card"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Industry classification table */
+    [data-test-id="industry-classification-table"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Records right sidebar */
+    [data-test-id="records-right-sidebar"],
+    .StyledRightSidebar-cUBXJb,
+    [class*="StyledRightSidebar-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Record page sidebars */
+    [data-selenium-test="left-sidebar-container"],
+    [data-selenium-test="right-sidebar-container"] {
+      background-color: #fcfdfe !important;
+    }
+    
+    /* Sidebar page */
+    [data-test-id="sidebar-page"],
+    [data-reagan-test="settings-page"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Pipeline select */
+    [data-test-id="pipeline-select"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Stage table */
+    [data-selenium-test="stage-table"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-selenium-test="stage-table"] th,
+    .WideHeader-kAoRjW,
+    [class*="WideHeader-"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Stage label inputs */
+    [data-onboarding="stage-label"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Pipeline rule cells */
+    [data-test-id^="pipeline-rule-cell-"] {
+      background-color: #ffffff !important;
+    }
+    
+    /* Meetings links table */
+    [data-selenium-test="meetings-links-table"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-selenium-test="meetings-search-input"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [data-selenium-test="meeting-link-name"] {
+      color: #005edf !important;
+    }
+    
+    /* Feature table */
+    [data-test-id="feature-table-head"],
+    [data-test-id^="feature-table-"] {
+      background-color: #eef3fb !important;
+    }
+    
+    [data-test-id="translated-feature"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* Pricing/merch cards */
+    [data-selenium-id$="-merch-card"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* DMO header filter section */
+    [data-test-id="dmo-header-filter-section"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Comments widget */
+    #hs_cos_wrapper_comments,
+    [data-hs-cos-type="module"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Line items table */
+    .line-items__table-h2 {
+      color: #1e2a4a !important;
+    }
+    
+    #line-items__table-body {
+      background-color: #ffffff !important;
+    }
+    
+    .item-name {
+      color: #1e2a4a !important;
+    }
+    
+    .currency__content {
+      color: #1e2a4a !important;
+    }
+    
+    .totals__row {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    .line-items__total-name {
+      color: #1e2a4a !important;
+    }
+    
+    /* Segments index */
+    [data-test-id="segments-index"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Notification badge */
+    span[id^="notification-badge-"] {
+      background-color: #005edf !important;
+      color: #ffffff !important;
+    }
+    
+    /* Radio content */
+    span[id^="radio-content-"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* ============================================
+       V1 PORTED RULES - Enhanced Coverage
+       ============================================ */
+    
+    /* Navigation enhancements - stroke for some icons */
+    #hs-vertical-nav svg path,
+    [class*="VerticalNavContainer"] svg path,
+    [class*="VNCMask"] svg path {
+      stroke: #c9d4e8 !important;
+    }
+    
+    #hs-vertical-nav [role="menuitem"]:hover svg path {
+      stroke: #ffffff !important;
+    }
+    
+    /* Nav scroll arrows and blocking elements */
+    [class*="VerticalNavContainer__StyledScrollArrow"],
+    [class*="VerticalNavMenu__BlockingElement"] {
+      background-color: #002c96 !important;
+    }
+    
+    /* Help button and sprocket logo hover */
+    [class*="HelpButton__StyledHelpButton"]:hover,
+    [class*="GlobalToolbarSprocket__StyledLogoContainer"] > a:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* Tile sections need transparent bg */
+    [class*="TileSection__StyledTileSection"] {
+      background-color: transparent !important;
+    }
+    
+    /* Table row striping */
+    [class*="RowComponent__StyledRowComponent"] {
+      background-color: #eef3fb !important;
+    }
+    
+    [class*="RowComponent__StyledRowComponent"]:nth-child(even) {
+      background-color: #ffffff !important;
+    }
+    
+    /* CRM-specific data tables */
+    [class*="CrmDataTable__"],
+    [class*="CrmDataTable__"] table,
+    [class*="CrmDataTable__"] tbody,
+    [class*="CrmDataTable__"] tr,
+    [class*="CrmDataTable__"] td {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Table container components */
+    [class*="StyledTableComponents__TableContainer"],
+    [class*="StyledTableComponents__ScrollWindowPresentational"],
+    [class*="ScrollOverhang__Wrapper"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Table cell internals */
+    [class*="CellContent"],
+    [class*="CellWrapper"] {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+    
+    [class*="TableHoverCell__StyledTableHoverCell"] {
+      background-color: inherit !important;
+    }
+    
+    /* Input field internals */
+    [class*="TextInput__StyledInput"] {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+    
+    [class*="StyledSearchInput"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="StyledSearchInput"]::placeholder {
+      color: #9ca3af !important;
+    }
+    
+    [class*="Wrappers__SearchInputWrapper"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    /* Button internal containers need transparency */
+    [class*="PrivateButton__StyledButtonTextContainer"],
+    [class*="AbstractDropdown__StyledButtonContents"],
+    [class*="AbstractDropdown__StyledDropdownButtonLabel"] {
+      background-color: transparent !important;
+    }
+    
+    /* Tag internal wrappers */
+    [class*="Tag__FlexWrapper"],
+    [class*="Tag__ContentWrapper"] {
+      background-color: transparent !important;
+      color: inherit !important;
+    }
+    
+    /* Tab active indicator */
+    [class*="Tab__TabIndicator"] {
+      background-color: #005edf !important;
+    }
+    
+    /* Tab component buttons and icons */
+    [class*="TabComponent"] [class*="PrivateButton__StyledButton"] {
+      background-color: transparent !important;
+      border: none !important;
+    }
+    
+    [class*="TabComponent"] [class*="PrivateButton__StyledButton"] svg {
+      fill: #1e2a4a !important;
+      color: #1e2a4a !important;
+    }
+    
+    [data-more-tabs="true"] {
+      background-color: transparent !important;
+    }
+    
+    /* Abstract element text */
+    [class*="AbstractElement__StyledTag"] {
+      color: #5d7182 !important;
+    }
+    
+    /* View and Flex border colors */
+    [class*="View__StyledView"] {
+      border-color: #cfdcf0 !important;
+    }
+    
+    [class*="Flex__StyledFlex"] {
+      border-block-start-color: #cfdcf0 !important;
+      border-block-end-color: #cfdcf0 !important;
+      border-inline-start-color: #cfdcf0 !important;
+      border-inline-end-color: #cfdcf0 !important;
+    }
+    
+    /* List separators */
+    [class*="List__StyledVerticalSeparator"] {
+      background-color: #cfdcf0 !important;
+    }
+    
+    /* User preferences menu details */
+    [class*="UserPreferences__UserPrefTextContainer"] *,
+    [class*="UserPreferences__UserName"],
+    [class*="UserPreferences__UserEmail"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="UserPreferences__UserLink"] {
+      color: #005edf !important;
+    }
+    
+    [class*="MenuItem__StyledLink"]:hover [class*="UserPreferences__UserLink"] {
+      color: #264ca6 !important;
+    }
+    
+    [class*="MenuPickerSubmenuItem__StyledLabel"],
+    [class*="PortalPickerSubmenuItem__StyledSpan"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="MenuItemWithSubmenu__StyledButton"],
+    [class*="MenuItemWithSubmenu__StyledButton"] p {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="MenuItemWithSubmenu__StyledButton"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="MenuItemWithSubmenu__StyledButton"] svg,
+    [class*="ArrowRightIcon__StyledSvg"] {
+      fill: #5d7182 !important;
+    }
+    
+    [class*="ExternalLinkIcon__StyledSvg"] {
+      fill: #005edf !important;
+    }
+    
+    [class*="TrellisThemeMenuGroup__StyledMenuGroup"],
+    [class*="TrellisThemeMenuGroup__TitleContainer"],
+    [class*="TrellisOpt__StyledMenuItem"],
+    [class*="TrellisOpt__LinkContainer"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+    
+    [class*="InviteLink__StyledMenuItem"] {
+      background-color: #ffffff !important;
+    }
+    
+    [class*="InviteLink__StyledMenuItem"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="AccountFooter__StyledListItem"],
+    [class*="AccountFooter__StyledMenuList"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    [class*="AccountFooter__StyledMenuList"] li {
+      background-color: #ffffff !important;
+    }
+    
+    [class*="AccountFooter__StyledMenuList"] li:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    .accounts__primary-text,
+    .accounts__primary-text-container {
+      color: #1e2a4a !important;
+    }
+    
+    /* SideNav section headings */
+    [class*="SideNav__StyledNav"] [class*="Heading__StyledHeading"] {
+      color: #5d7182 !important;
+    }
+    
+    /* Back link in settings */
+    [class*="BackLink__StyledLink"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="BackLink__StyledLink"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* Multi-column layouts */
+    [class*="MultiColumn__StyledMultiColumn"],
+    .fvQPGp,
+ [class*="View__"] >  [class*="CardSection__StyledCardSection"]
+    {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+    
+    /* Form control labels */
+    [class*="FormControl__StyledInnerLabel"] {
+      color: #1e2a4a !important;
+    }
+    
+    /* React-Select (legacy select component) */
+    .Select-control {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    .Select-control:hover {
+      border-color: #a9c3e8 !important;
+    }
+    
+    .Select-multi-value-wrapper {
+      background-color: transparent !important;
+    }
+    
+    .Select-input,
+    .Select-input input {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+    
+    .Select-placeholder {
+      color: #9ca3af !important;
+    }
+    
+    .Select-arrow-zone {
+      background-color: transparent !important;
+    }
+    
+    .Select-arrow {
+      border-color: #5d7182 transparent transparent !important;
+    }
+    
+    .Select-menu-outer {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+    
+    .Select-option, .Select-option-group-label {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+    
+    .Select-option:hover,
+    .Select-option.is-focused {
+      background-color: #e4edfa !important;
+    }
+    
+    .Select-option.is-selected {
+      background-color: #005edf !important;
+    }
+    
+    .Select-value,
+    .Select-value-label {
+      color: #1e2a4a !important;
+    }
+    
+    /* Shimmer loading states */
+    [class*="Shimmer__ShimmerFill"],
+    [class*="Shimmer__"] {
+      background-color: #e4edfa !important;
+    }
+    
+    /* Actions menu active state */
+    [class*="ActionsMenustyles__StyledMenuOption"]:active {
+      background-color: #e4edfa !important;
+    }
+    
+    /* Expandable preferences in settings */
+    [class*="ExpandablePreference__ClickableHeaderView"]:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    [class*="ExpandableSection__ExpandableWrapper"],
+    [class*="PreferencesListActionBar__LinksContainer"],
+    [class*="PreferencesListActionBar__IconGrid"] {
+      background-color: transparent !important;
+    }
+    
+    [data-test-id="preference-group-primary-bucket"],
+    [data-test-id="preferences-list-action-search"] {
+      background-color: #eef3fb !important;
+    }
+    
+    /* Extension footer */
+    [data-test-id="extension-footer"] {
+      background-color: transparent !important;
+    }
+    
+    /* Ecosystem app cards and sliders */
+    [class*="EcosystemCardMedium__StyledUnderlineOnHover"] {
+      color: #1e2a4a !important;
+    }
+    
+    [class*="EcosystemSlider__ArrowButtonWrapper"] button {
+      background-color: #ffffff !important;
+      border-color: #005edf !important;
+    }
+    
+    [class*="EcosystemSlider__ArrowButtonWrapper"] button:hover {
+      background-color: #e4edfa !important;
+    }
+    
+    /* GRADIENTS for themed backgrounds */
+    
+
+    /* ============================================
+       DATA-DRIVEN RULES (from UI map extraction)
+       Calendar/Contacts page elements
+       ============================================ */
+
+    /* CRM Index Page Container */
+    div#crm[data-selenium-test="crm-index-page"],
+    [data-test-table-version="v2"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+
+    /* Global Search Input */
+    input#global-search-input,
+    [class*="StyledSearchInput-"] {
+      background-color: transparent !important;
+      color: #ffffff !important;
+    }
+
+    /* Search Icon */
+    [class*="StyledSearchIcon-"] {
+      fill: #ffffff !important;
+    }
+
+    /* Keyboard Shortcut Key */
+    [class*="StyledKey-"] {
+      color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Global Toolbar Divider */
+    [class*="GlobalToolbarDivider-"] {
+      background-color: #cfdcf0 !important;
+    }
+
+    /* Vertical Nav Scroll Arrow */
+    [class*="VerticalNavContainer__StyledScrollArrow-"] {
+      background-color: #002c96 !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Expand/Collapse Icon */
+    [class*="ExpandCollapseIcon__Outline-"] {
+      fill: #ffffff !important;
+    }
+
+    [class*="ExpandCollapseIcon__InnerArrow-"] {
+      fill: #c9d4e8 !important;
+    }
+
+    /* Object Switcher Dropdown */
+    [data-test-id="object-switcher__dropdown"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [data-test-id="object-switcher__dropdown"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Dropdown Caret */
+    [data-test-id="dropdown-caret"],
+    [class*="DropdownCaret__StyledCaret-"] {
+      border-top-color: #5d7182 !important;
+    }
+
+    /* Tab Components - Selected State */
+    [class*="TabComponent-"][aria-selected="true"],
+    [data-test-id^="view-tab-"][aria-selected="true"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+      border-bottom-color: #fcfdfe !important;
+    }
+
+    /* Tab Components - Unselected State */
+    [class*="TabComponent-"][aria-selected="false"],
+    [data-test-id^="view-tab-"][aria-selected="false"] {
+      background-color: #eef3fb !important;
+      color: #5d7182 !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="TabComponent-"][aria-selected="false"]:hover,
+    [data-test-id^="view-tab-"][aria-selected="false"]:hover {
+      background-color: #e4edfa !important;
+      color: #1e2a4a !important;
+    }
+
+    /* View Title Text */
+    [data-test-id^="view-title-"],
+    [class*="Text__StyledText-"] {
+      color: #1e2a4a !important;
+    }
+
+    /* Add View Menu Button */
+    [data-test-id="add-view-menu-button"] {
+      background-color: #fcfdfe !important;
+      color: #5d7182 !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [data-test-id="add-view-menu-button"]:hover {
+      background-color: #e4edfa !important;
+      color: #1e2a4a !important;
+    }
+
+    /* View Tab Menu and Close Button (transparent) */
+    [data-test-id="view-tab-menu"],
+    [data-test-id^="close-view-"] {
+      background-color: transparent !important;
+    }
+
+    [data-test-id="view-tab-menu"] svg,
+    [data-test-id^="close-view-"] svg {
+      fill: #5d7182 !important;
+    }
+
+    [data-test-id="view-tab-menu"]:hover svg,
+    [data-test-id^="close-view-"]:hover svg {
+      fill: #1e2a4a !important;
+    }
+
+    /* Index Topbar Dropdown (actions menu) */
+    [data-selenium-test="index-topbar-dropdown"] {
+      background-color: #fcfdfe !important;
+      color: #5d7182 !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [data-selenium-test="index-topbar-dropdown"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Create Object Dropdown (primary button) */
+    [data-test-id="create-object-dropdown"] {
+      background-color: #005edf !important;
+      color: #ffffff !important;
+    }
+
+    [data-test-id="create-object-dropdown"]:hover {
+      background-color: #264ca6 !important;
+    }
+
+    /* Floating Action Button */
+    [class*="FloatingActionButton__Fab-"] {
+      background-color: #005edf !important;
+      background-image: linear-gradient(89deg, #005edf, #264ca6) !important;
+      color: #ffffff !important;
+    }
+
+    [class*="FloatingActionButton__Fab-"]:hover {
+      background-color: #264ca6 !important;
+    }
+
+    /* Flex Containers (main content area) */
+    [class*="Flex__StyledFlex-"] {
+      background-color: transparent !important;
+      border-color: #cfdcf0 !important;
+    }
+
+[data-test-id="abstract-page-template-header"] > [class*="Flex__StyledFlex-"]{
+      background-color: #005edf !important;
+}
+
+    /* Specific i18n text in nav */
+    [data-key="nav.icons.breezeAssistant"] {
+      color: #ffffff !important;
+    }
+
+    [data-key*="nav.globalToolbar"] {
+      color: #ffffff !important;
+    }
+
+    /* SVG Icon Base */
+    [class*="SVGIconBase__StyledSVGIconBase-"] {
+      fill: #c9d4e8 !important;
+    }
+
+    /* Render Nav Component Iframe */
+    [class*="RenderNavComponent__StyledIframe-"] {
+      background-color: #eef3fb !important;
+    }
+
+    /* Filter Dropdowns - External Option Enum */
+    [data-test-id^="external-option-enum-"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [data-test-id^="external-option-enum-"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Date Data Filter Dropdown */
+    [data-test-id="date-data-filter-dropdown"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [data-test-id="date-data-filter-dropdown"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Vertical Nav Menu Item Toggles */
+    [data-test-id$="-toggle"][data-location="vertical-nav"] {
+      color: #c9d4e8 !important;
+    }
+
+    [data-test-id$="-toggle"][data-location="vertical-nav"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Vertical Nav Icon specific fills */
+    [data-test-id^="vertical-nav-icon__"] {
+      fill: #c9d4e8 !important;
+    }
+
+    /* Active/Selected nav item */
+    [data-test-id$="-toggle"][aria-expanded="true"] {
+      color: #ffffff !important;
+    }
+
+    [data-test-id$="-toggle"][aria-expanded="true"] [data-test-id^="vertical-nav-icon__"] {
+      fill: #ffffff !important;
+    }
+
+    /* Global Toolbar Items with data-location */
+    [data-location="global-toolbar"] {
+      color: #c9d4e8 !important;
+    }
+
+    [data-location="global-toolbar"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Object Create Menu */
+    [data-test-id="object-create-menu"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Mini Trial Guide Button */
+    [data-test-id="mini-trial-guide-button"] {
+      color: #c9d4e8 !important;
+    }
+
+    /* Calling Nav Component Icon */
+    [class*="CallingNavComponentIcon__StyledToggleButton-"] {
+      color: #c9d4e8 !important;
+    }
+
+    [class*="CallingNavComponentIcon__StyledToggleButton-"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* In-App Help Iframe container */
+    #in-app-help-iframe {
+      background-color: #eef3fb !important;
+    }
+
+    /* Bookmarks Group Toggle */
+    [data-test-id="@@nav-item/bookmarks-group-toggle"] {
+      color: #c9d4e8 !important;
+    }
+
+    /* Nav Favorite Icon */
+    [data-test-id="nav-favorite-icon"] {
+      fill: #c9d4e8 !important;
+    }
+
+    /* Expand Collapse Button */
+    [data-test-id="isPinned-false"],
+    [data-test-id="isPinned-true"] {
+      color: #c9d4e8 !important;
+    }
+
+    /* ============================================
+       CALENDAR VIEW THEMING
+       ============================================ */
+
+    /* Calendar Header (day names row) */
+    [data-test-id="month-calendar-header"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Calendar Shell */
+    [class*="CalendarViewShell__InnerShell-"] {
+      background-color: #eef3fb !important;
+    }
+
+    /* Month Calendar Grid */
+    [class*="MonthCalendarStyles__MonthGrid-"] {
+      background-color: #eef3fb !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Calendar Row Wrapper */
+    [class*="MonthCalendarStyles__RowWrapper-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Calendar Row (week row) */
+    [class*="MonthCalendarStyles__Row-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Calendar Week cells */
+    [class*="MonthCalendarStyles__Week-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+      color: #1e2a4a !important;
+    }
+
+    /* Calendar Events Wrapper */
+    [class*="MonthCalendarStyles__EventsWrapper-"] {
+      background-color: transparent !important;
+    }
+
+    /* Calendar Event chips */
+    [class*="MonthCalendarStyles__Event-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+      color: #1e2a4a !important;
+    }
+
+    [class*="MonthCalendarStyles__Event-"]:hover {
+      background-color: #eef3fb !important;
+      border-color: #a9c3e8 !important;
+    }
+
+    /* Calendar day headers (Sunday, Monday, etc.) */
+    [class*="MonthCalendarStyles__MonthGrid-"] h6,
+    [data-test-id="month-calendar-header"] h6,
+    [class*="MonthCalendarStyles"] [role="heading"] {
+      color: #5d7182 !important;
+    }
+
+    /* Calendar day numbers */
+    [class*="MonthCalendarStyles__Week-"] p,
+    [class*="MonthCalendarStyles__Row-"] p {
+      color: #1e2a4a !important;
+    }
+
+    /* Calendar navigation buttons (Month dropdown, Today, arrows) */
+    [class*="MonthCalendarStyles"] button,
+    [class*="CalendarViewShell"] button {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="MonthCalendarStyles"] button:hover,
+    [class*="CalendarViewShell"] button:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Calendar group buttons (Month/Today navigation) */
+    [class*="MonthCalendarStyles"] [role="group"] button,
+    [class*="CalendarViewShell"] [role="group"] button {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Scroll Overhang in calendar */
+    [class*="ScrollOverhang__Wrapper-"] {
+      background-color: #eef3fb !important;
+    }
+
+    /* Calendar cell borders */
+    [class*="MonthCalendarStyles__Week-"]::after,
+    [class*="MonthCalendarStyles__Row-"]::after {
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Event text styling */
+    [class*="MonthCalendarStyles__Event-"] span,
+    [class*="MonthCalendarStyles__Event-"] p {
+      color: #1e2a4a !important;
+    }
+
+    /* ============================================
+       SIDEBAR / LEFT PANEL THEMING
+       (Contact list, calendar sidebar)
+       ============================================ */
+
+    /* Scroll Container */
+    [class*="ScrollContainer__DefaultScrollContainer-"] {
+      background-color: #fcfdfe !important;
+    }
+
+    /* Scroll Overhang elements */
+    [class*="Overhang__StyledOverhang-"] {
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+
+    /* Scroll Overhang Wrapper */
+    [class*="ScrollOverhang__Wrapper-"] {
+      background-color: #fcfdfe !important;
+    }
+
+    /* Contact list item rows */
+    [class*="sc-AxjAm"][role="button"],
+    div[role="button"][class*="sc-"] {
+      background-color: transparent !important;
+    }
+
+    [class*="sc-AxjAm"][role="button"]:hover,
+    div[role="button"][class*="sc-"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Avatar Container Wrapper */
+    [class*="AvatarContainer__AvatarWrapper-"] {
+      background-color: transparent !important;
+    }
+
+    /* Avatar Content Holder - override inline styles */
+    [class*="AvatarContentWrapper__AvatarContentHolder-"],
+    [data-test-id="content-holder"] {
+      background-color: #e4edfa !important;
+    }
+
+    /* Avatar text SVG */
+    [class*="TextSvg__StyledTextSvg-"] {
+      fill: #1e2a4a !important;
+    }
+
+    /* Box styled containers */
+    [class*="Box__StyledBox-"] {
+      background-color: transparent !important;
+    }
+
+    /* Paginator navigation */
+    [class*="Paginator__StyledNav-"] {
+      background-color: transparent !important;
+    }
+
+    /* Paginator buttons */
+    [class*="Paginator__StyledNav-"] button {
+      background-color: transparent !important;
+      color: #5d7182 !important;
+    }
+
+    [class*="Paginator__StyledNav-"] button:hover:not([aria-disabled="true"]) {
+      background-color: #e4edfa !important;
+      color: #1e2a4a !important;
+    }
+
+    [class*="Paginator__StyledNav-"] button[data-active="true"] {
+      color: #1e2a4a !important;
+    }
+
+    /* Truncate String text */
+    [class*="TruncateString__TruncateStringContainer-"],
+    [class*="TruncateString__TruncateStringInner-"] {
+      color: #1e2a4a !important;
+    }
+
+    /* Links in contact list */
+    [class*="Link__StyledLink-"][data-link-use="dark"] {
+      color: #005edf !important;
+    }
+
+    [class*="Link__StyledLink-"][data-link-use="dark"]:hover {
+      color: #264ca6 !important;
+    }
+
+    /* Private Button styling for sidebar buttons */
+    [class*="PrivateButton__StyledButton-"][data-button-use="transparent"] {
+      color: #1e2a4a !important;
+    }
+
+    [class*="PrivateButton__StyledButton-"][data-button-use="transparent"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    [class*="PrivateButton__StyledButton-"][data-button-use="tertiary-light"] {
+      background-color: transparent !important;
+      color: #5d7182 !important;
+    }
+
+    [class*="PrivateButton__StyledButton-"][data-button-use="tertiary-light"]:hover {
+      background-color: #e4edfa !important;
+      color: #1e2a4a !important;
+    }
+
+    /* Record count badge */
+    [data-test-id="record-count"] {
+      background-color: #e4edfa !important;
+      color: #5d7182 !important;
+    }
+
+    /* View styled view inside scroll containers */
+    [class*="ScrollContainer__DefaultScrollContainer-"] [class*="View__StyledView-"] {
+      background-color: #fcfdfe !important;
+    }
+
+    /* ============================================
+       SETTINGS PAGE THEMING
+       (From UI map extraction: settings/user-preferences/profile)
+       ============================================ */
+
+    /* Settings page body override */
+    body.hubspot.sticky-global-toolbar.ui-app {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+
+    /* Settings select dropdowns */
+    [data-test-id="language-select"],
+    [data-test-id="locale-select"],
+    [data-test-id="country-select"],
+    [data-test-id="default-home-select"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [data-test-id="language-select"]:hover,
+    [data-test-id="locale-select"]:hover,
+    [data-test-id="country-select"]:hover,
+    [data-test-id="default-home-select"]:hover {
+      background-color: #e4edfa !important;
+      border-color: #a9c3e8 !important;
+    }
+
+    /* BreakString component (text truncation) */
+    [class*="BreakString__StyledBreakString-"],
+    [class*="BreakString__"] {
+      color: #1e2a4a !important;
+    }
+
+    /* Accounts menu button hover */
+    button#hs-global-toolbar-accounts:hover,
+    [data-test-id="hs-global-toolbar-accounts"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Settings page specific sections */
+    [data-reagan-test="settings-page"],
+    [data-test-id="settings-content"] {
+      background-color: #eef3fb !important;
+    }
+
+    /* Settings page cards */
+    [data-test-id="profile-card"],
+    [data-test-id="preferences-card"],
+    [data-test-id="notifications-card"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Settings nav items with aria-current */
+    [class*="SideNavItem__StyledCustomLink-"][aria-current="page"],
+    [class*="SideNavItem__"][aria-current="true"] {
+      background-color: #fcfdfe !important;
+      color: #005edf !important;
+    }
+
+    /* Menu items in dropdowns */
+    [role="option"],
+    [role="listbox"] [role="option"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+
+    [role="option"]:hover,
+    [role="option"][data-highlighted="true"],
+    [role="option"][aria-selected="true"] {
+      background-color: #e4edfa !important;
+    }
+
+    /* Dropdown portal/overlay containers */
+    [class*="DropdownOverlay__"],
+    [class*="DropdownPortal__"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Abstract dropdowns */
+    [class*="AbstractDropdown__StyledDropdown-"],
+    [class*="AbstractDropdown__DropdownContainer-"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Help button styling */
+    button.HelpButton__StyledHelpButton-kJWFLt,
+    [class*="HelpButton__StyledHelpButton-"] {
+      color: #c9d4e8 !important;
+    }
+
+    [class*="HelpButton__StyledHelpButton-"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* Calling toggle button */
+    button.CallingNavComponentIcon__StyledToggleButton-bMIzqm,
+    [class*="CallingNavComponentIcon__StyledToggleButton-"] {
+      color: #c9d4e8 !important;
+    }
+
+    /* List box containers */
+    [role="listbox"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Combobox input containers */
+    [role="combobox"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Search input containers with combobox role */
+    [role="combobox"] input {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+
+    /* Profile image containers */
+    [data-test-id="profile-image"],
+    [data-test-id="user-avatar"] {
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Settings form labels */
+    [class*="FormLabel__"],
+    [class*="Label__StyledLabel-"] {
+      color: #1e2a4a !important;
+    }
+
+    /* Settings form helper text */
+    [class*="FormHelperText__"],
+    [class*="HelperText__"] {
+      color: #5d7182 !important;
+    }
+
+    /* Info icon SVG fills */
+    svg[data-icon-name="info"],
+    svg[data-icon-name="question"] {
+      fill: #5d7182 !important;
+    }
+
+    /* =========================================================================
+       WORKFLOW ACTIONS PANEL
+       ========================================================================= */
+
+    /* End markers (workflow termination points) - fix white background */
+    [class*="EndMarker__StyledEndMarkerBody"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Quick action buttons (Delay, Branch, Go to workflow, etc.) */
+    [class*="QuickActionStyledComponents__StyledQuickAction"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="QuickActionStyledComponents__StyledQuickAction"]:hover {
+      background-color: #e4edfa !important;
+      border-color: #a9c3e8 !important;
+    }
+
+    [class*="QuickActionStyledComponents__StyledQuickAction"][aria-disabled="true"] {
+      background-color: #eef3fb !important;
+      color: #9ca3af !important;
+    }
+
+    /* Quick action container */
+    [class*="QuickActionStyledComponents__StyledQuickActionContainer"] {
+      background-color: transparent !important;
+    }
+
+    /* AI Assistant Banner in actions panel */
+    [class*="ActionsList__AiAssistantBannerContainer"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* Actions panel sections */
+    [data-test-id="all-actions-page"] [class*="Section__StyledSection"] {
+      background-color: #fcfdfe !important;
+    }
+
+[class*="PanelBody__StyledPanelBody"]{
+      background-color: transparent !important;
+}
+
+[class*="IconHolder__StyledIconHolder"]{
+      background-color: #eef3fb !important;
+}
+
+[class*="AutomationBuilderCardStyles__StyledActionCardBody"]{
+      background-image: none !important;
+}
+
+    /* Expandable category rows in actions panel */
+    [data-test-id="new-action-category"] [role="button"] {
+      background-color: transparent !important;
+      color: #1e2a4a !important;
+    }
+
+    [data-test-id="new-action-category"] [role="button"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* =========================================================================
+       TOGGLE/SWITCH COMPONENTS
+       ========================================================================= */
+
+    /* Toggle track - unchecked state needs darker background */
+    [class*="Toggle__Switch-"]:not([data-checked="true"]) {
+      background-color: #e4edfa !important;
+    }
+
+    /* Toggle text inside switch */
+    [class*="Toggle__Text-"] {
+      color: #5d7182 !important;
+    }
+
+    /* =========================================================================
+       FORM BUTTONS
+       ========================================================================= */
+
+    /* Form buttons need light text - these have dark text rgb(51, 71, 91) */
+    [class*="PrivateButton__StyledButton"][data-button-use="form"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="PrivateButton__StyledButton"][data-button-use="form"]:hover {
+      background-color: #e4edfa !important;
+    }
+
+    /* =========================================================================
+       EMAIL SUBJECT LINES & TIMELINE
+       ========================================================================= */
+
+    /* Email subject lines in timeline */
+    strong[data-test-id="email-subject-line"],
+    [class*="PreviewEventSubject__StyledStrong"] {
+      color: #1e2a4a !important;
+    }
+
+    /* Email event names */
+    i18n-string[data-key="crm-events.email.name"],
+    i18n-string[data-key*="crm-events"][data-key*=".name"] {
+      color: #1e2a4a !important;
+    }
+
+    /* =========================================================================
+       ACADEMY WIZARD & SELECTABLE BOXES
+       ========================================================================= */
+
+    /* Academy selectable box labels - have dark text rgb(51, 71, 91) */
+    [class*="SelectableBox__StyledInnerBox"] i18n-string,
+    [class*="SelectableBox__"] span,
+    [class*="SelectableBox__StyledInnerBox"] {
+      color: #1e2a4a !important;
+    }
+
+    /* =========================================================================
+       DATA STUDIO
+       ========================================================================= */
+
+    /* Data Studio containers */
+    [data-test-id="dataset-container"],
+    [class*="DatasetView__"] {
+      background-color: #eef3fb !important;
+      color: #1e2a4a !important;
+    }
+
+    /* =========================================================================
+       PROSPECTING SIDEBAR
+       ========================================================================= */
+
+    /* Prospecting sidebar panel */
+    [class*="ProspectingSidebar__"],
+    [data-test-id*="prospecting-sidebar"] {
+      background-color: #fcfdfe !important;
+    }
+
+    /* =========================================================================
+       DUPLICATES MANAGER
+       ========================================================================= */
+
+    /* Duplicate record comparison cards */
+    [data-test-id*="duplicate-card"],
+    [class*="DuplicateCard__"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* =========================================================================
+       ENRICHMENT SETTINGS
+       ========================================================================= */
+
+    /* Enrichment toggle row containers */
+    [class*="EnrichmentToggle__"],
+    [data-test-id*="enrichment-toggle"] {
+      background-color: #fcfdfe !important;
+    }
+
+    /* =========================================================================
+       SALES FORECASTING
+       ========================================================================= */
+
+    /* Pipeline selector dropdowns in settings */
+    [class*="PipelineSelect__"],
+    [data-test-id*="pipeline-select"] select,
+    [data-test-id*="pipeline-select"] [role="listbox"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+
+    /* =========================================================================
+       DATA AGENT
+       ========================================================================= */
+
+    /* Data agent result cards */
+    [class*="DataAgentResult__"],
+    [data-test-id*="data-agent-result"] {
+      background-color: #fcfdfe !important;
+      color: #1e2a4a !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    /* =========================================================================
+       DIALOG / MODAL
+       ========================================================================= */
+
+    [class*="Dialog__StyledDialog-"] {
+      background-color: #ffffff !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="DialogHeader__StyledDialogHeader-"] {
+      background: linear-gradient(135deg, #fcfdfe 0%, #eef3fb 100%) !important;
+      border-bottom: 1px solid #cfdcf0 !important;
+    }
+
+    [class*="DialogHeader__StyledHeaderInner-"] {
+      color: #1e2a4a !important;
+    }
+
+    [class*="DialogHeader__StyledHeaderInner-"] h2,
+    [class*="DialogHeader__StyledHeaderInner-"] [class*="Text__StyledText-"] {
+      color: #1e2a4a !important;
+    }
+
+    [class*="DialogBody__StyledDialogBody-"] {
+      background-color: #ffffff !important;
+      color: #1e2a4a !important;
+    }
+
+    [class*="DialogFooter__StyledFooter-"] {
+      background: linear-gradient(135deg, #eef3fb 0%, #fcfdfe 100%) !important;
+      border-top: 1px solid #cfdcf0 !important;
+    }
+
+    /* =========================================================================
+       KANBAN / CRM BOARD
+       ========================================================================= */
+
+    [class*="ColumnStyles__ColumnWrapper-"] {
+      background-color: #eef3fb !important;
+    }
+
+    [class*="ColumnStyles__LinearColumnHeaderBase-"] {
+      background: linear-gradient(180deg, #fcfdfe 0%, #eef3fb 100%) !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="ColumnStyles__ColumnBodyBase-"] {
+      background-color: #eef3fb !important;
+    }
+
+    [class*="ColumnArrows__LeftArrowSvg-"] polygon,
+    [class*="ColumnArrows__RightArrowSvg-"] polygon {
+      fill: #fcfdfe !important;
+    }
+
+    [class*="ColumnArrows__LeftArrowSvg-"] line,
+    [class*="ColumnArrows__RightArrowSvg-"] line {
+      stroke: #cfdcf0 !important;
+    }
+
+    [class*="CardWrapper__StyledUITile-"] {
+      background-color: #fcfdfe !important;
+      border-color: #cfdcf0 !important;
+    }
+
+    [class*="CardWrapper__StyledUITile-"]:hover,
+    [class*="HoverWrapper__HoverContainer-"]:hover [class*="CardWrapper__StyledUITile-"] {
+      background-color: #e4edfa !important;
+      border-color: #a9c3e8 !important;
+    }
+
+    [class*="TitleSection__StyledTitleContainer-"],
+    [class*="TitleSection__HoverContainer-"] {
+      color: #1e2a4a !important;
+    }
+
+    [class*="Title__TextTitle-"] {
+      color: #1e2a4a !important;
+    }
+
+    [class*="ContentWrapper__StyledContentWrapper-"] {
+      color: #5d7182 !important;
+    }
+
+    [class*="CrmObjectBoardCard__StyledSection-"] {
+      color: #5d7182 !important;
+    }
+
+    [data-test-id="cdb-column-name"] {
+      color: #1e2a4a !important;
+    }
+
+    [data-test-id="column-total-cards"] {
+      color: #5d7182 !important;
+    }
+
+    [data-test-id="board-card-quick-actions-container"] button {
+      color: #5d7182 !important;
+    }
+
+    [data-test-id="board-card-quick-actions-container"] button:hover {
+      color: #1e2a4a !important;
+      background-color: #e4edfa !important;
+    }
+  
   /* =========================================================
-     1. TOP-BAR + LINKE ICON-RAIL (CRM/Marketing/Sales/…)
-     -> eine durchgehende Navy-Fläche, wie im "alten" HubSpot-Design
-     (dort #394651 Blaugrau statt Schwarz), nur eben in metergrid-Navy.
-     Mehrere redundante Selektoren, damit der Hintergrund sicher greift.
+     ERGÄNZUNG: rundes Such-Feld wie im metergrid-Portal
+     (Extension setzt nur Farben, nicht die Form)
      ========================================================= */
-  header,
-  header[role="banner"],
-  .private-topbar,
-  #hs-nav-header,
-  nav[aria-label*="Primary" i],
-  nav[aria-label*="Main" i],
-  [role="navigation"][aria-label*="Primary" i],
-  .private-nav,
-  .private-nav__primary-nav,
-  #navAppContainer,
-  aside,
-  [class*="sidebar" i],
-  [class*="topbar" i] {
-    background: var(--mg-navy) !important;
-    background-color: var(--mg-navy) !important;
-  }
-
-  /* Schrift/Icons in der Chrome: immer HELL, nie die Link-Blaufarbe -
-     das war der v1-Kontrastfehler (blaue Schrift auf dunklem Grund). */
-  header, header *,
-  header[role="banner"], header[role="banner"] *,
-  .private-topbar, .private-topbar *,
-  nav[aria-label*="Primary" i], nav[aria-label*="Primary" i] *,
-  .private-nav, .private-nav *,
-  aside, aside * {
-    color: var(--mg-rail-text) !important;
-  }
-  header svg, header[role="banner"] svg, .private-topbar svg,
-  nav[aria-label*="Primary" i] svg, .private-nav svg, aside svg {
-    fill: var(--mg-rail-text) !important;
-  }
-
-  /* Such-Feld in der Top-Bar: dezente helle Fläche statt Navy-Volltreffer */
-  header input[type="search"],
-  header input[placeholder*="Such" i],
-  header input[placeholder*="search" i] {
-    background-color: var(--mg-blue-mid) !important;
-    border: none !important;
+  form#hs-search-react,
+  [class*="StyledSearchForm"],
+  [data-test-id="global-search-input-react"] {
     border-radius: 20px !important;
-    color: var(--mg-white) !important;
-  }
-
-  /* Aktiver Eintrag: blaue Pille, weißer Text/Icon (höhere Spezifität
-     als die helle Standard-Regel oben, damit sie hier gewinnt) */
-  .private-nav [aria-current="page"],
-  nav[aria-label*="Primary" i] [aria-current="page"],
-  aside [aria-current="page"],
-  .private-nav [class*="active" i],
-  nav[aria-label*="Primary" i] [class*="active" i] {
-    background-color: var(--mg-blue) !important;
-    border-radius: 6px;
-  }
-  .private-nav [aria-current="page"] *,
-  nav[aria-label*="Primary" i] [aria-current="page"] *,
-  aside [aria-current="page"] *,
-  .private-nav [class*="active" i] *,
-  nav[aria-label*="Primary" i] [class*="active" i] * {
-    color: var(--mg-white) !important;
-    fill: var(--mg-white) !important;
-  }
-
-  /* =========================================================
-     2. INHALTS-LINKS (nur im Hauptbereich, NICHT in Top-Bar/Rail)
-     ========================================================= */
-  main a:not([class*="button" i]),
-  [role="main"] a:not([class*="button" i]),
-  .private-main-container a:not([class*="button" i]),
-  .private-link {
-    color: var(--mg-blue) !important;
-  }
-
-  /* =========================================================
-     3. PRIMÄR-BUTTONS (grün/orange -> metergrid-Blau)
-     ========================================================= */
-  button[class*="primary" i],
-  .uiButton--primary,
-  .private-button--primary,
-  button[data-test-id*="primary" i] {
-    background-color: var(--mg-blue) !important;
-    border-color: var(--mg-blue) !important;
-    color: var(--mg-white) !important;
-  }
-  button[class*="primary" i]:hover,
-  .uiButton--primary:hover,
-  .private-button--primary:hover {
-    background-color: var(--mg-blue-mid) !important;
-    border-color: var(--mg-blue-mid) !important;
-  }
-
-  /* Sekundär-/Outline-Buttons: Rahmen + Text in Blau statt Orange/Grau */
-  button[class*="secondary" i],
-  .uiButton--secondary,
-  .private-button--secondary {
-    color: var(--mg-blue) !important;
-    border-color: var(--mg-blue) !important;
-  }
-
-  /* =========================================================
-     4. SEITEN-HINTERGRUND + KARTEN (Look des metergrid-Dashboards)
-     ========================================================= */
-  #app,
-  main,
-  [role="main"],
-  .private-main-container {
-    background-color: var(--mg-bg) !important;
-  }
-
-  [class*="card" i],
-  [class*="panel" i],
-  .uiPanel {
-    background-color: var(--mg-bg-soft) !important;
-    border: 1px solid var(--mg-border) !important;
-    border-radius: 8px !important;
-  }
-
-  /* =========================================================
-     5. TEXT, TABELLEN, FORMULARE – Blauton statt Grayscale
-     Ohne diesen Abschnitt trägt nur die Rail Farbe, der Rest
-     (Überschriften, Tabellen, Rahmen, Formular-Akzente) bleibt
-     HubSpots neutrales Schwarz/Grau -> wirkt dann wie ein reiner
-     Kontrastfilter statt wie ein Markendesign ("Bedtime Mode"-Effekt).
-     ========================================================= */
-  main h1, main h2, main h3, main h4, main h5, main h6,
-  [role="main"] h1, [role="main"] h2, [role="main"] h3,
-  [role="main"] h4, [role="main"] h5, [role="main"] h6,
-  .private-main-container h1, .private-main-container h2,
-  .private-main-container h3 {
-    color: var(--mg-text) !important;
-  }
-
-  /* Tabellen: leichte Blau-Tönung statt neutralem Grau bei Header/Rahmen */
-  th, thead, [class*="tableHeader" i], [role="columnheader"] {
-    background-color: var(--mg-bg) !important;
-  }
-  table, td, th {
-    border-color: var(--mg-border) !important;
-  }
-
-  /* Checkboxen/Radios/Regler: Blau statt HubSpot-Orange als Akzentfarbe */
-  input[type="checkbox"],
-  input[type="radio"],
-  input[type="range"] {
-    accent-color: var(--mg-blue) !important;
-  }
-
-  /* Aktiver Tab/Filter (z.B. Deal-Views): Blau statt Schwarz */
-  [role="tab"][aria-selected="true"],
-  [class*="tab" i][class*="active" i],
-  [class*="tab" i][class*="selected" i] {
-    color: var(--mg-blue) !important;
-    border-color: var(--mg-blue) !important;
-  }
-
-  /* =========================================================
-     6. FUNKTIONALE FARBEN – bewusst unverändert lassen
-     (Rot = Fehler/überfällig, wie "Offene Zahlungen" im metergrid-
-     Portal auch nicht der Markenfarbe folgt). Nur helle Erfolgs-
-     Badges an das metergrid-Mint angleichen:
-     ========================================================= */
-  [class*="badge" i][class*="success" i],
-  [class*="tag" i][class*="green" i] {
-    background-color: var(--mg-mint) !important;
-    color: var(--mg-navy) !important;
   }
 
 } /* Ende @-moz-document */
