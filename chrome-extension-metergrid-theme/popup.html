@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HubSpot Theme Changer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-text">
+        <h1>HubSpot Themes</h1>
+        <p class="subtitle">Customize your HubSpot experience</p>
+      </div>
+      <a href="https://daeda.tech?utm_source=hubspot_theme_changer&utm_medium=extension&utm_content=header_logo" target="_blank" class="header-logo-link">
+        <img src="https://cdn.prod.website-files.com/67f11ad962a53b397df7f0a3/67f51e898a523c59f3378bda_FinishedLogoWhite%201%20(2).avif" alt="Daeda" class="header-logo">
+      </a>
+    </header>
+
+    <a href="https://daeda-ai.daeda.tech/auth?utm_source=hubspot_theme_changer&utm_medium=extension&utm_content=banner" target="_blank" class="ad-banner">
+      <img src="https://cdn.prod.website-files.com/67f11ad962a53b397df7f117/696627d878f8be6f4bbb4977_Daeda-AI-Logo-New.png" alt="Daeda AI" class="ad-logo">
+      <span class="ad-text">100+ AI models in your workflows</span>
+      <span class="ad-cta">Try Free →</span>
+    </a>
+
+    <div class="tabs-container">
+      <div class="tabs-nav" id="tabsNav"></div>
+      <div class="tabs-content" id="tabsContent"></div>
+    </div>
+
+    <div class="exclusion-section" id="exclusionSection">
+      <div class="exclusion-row">
+        <button class="exclude-btn" id="excludeBtn">
+          <span class="exclude-icon" id="excludeIcon">🚫</span>
+          <span id="excludeBtnText">Exclude page from theme</span>
+        </button>
+        <button class="reset-btn" id="resetBtn" title="Double-click to clear all exclusions">↺</button>
+      </div>
+      <p class="exclude-hint" id="excludeHint"></p>
+    </div>
+
+    <footer class="footer">
+      <p>Refresh HubSpot tab after selecting a theme</p>
+    </footer>
+  </div>
+  
+  <script src="themes_v2.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
