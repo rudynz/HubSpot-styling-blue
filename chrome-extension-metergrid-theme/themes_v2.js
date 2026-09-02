@@ -1165,11 +1165,16 @@ function buildElementOverridesV2(p) {
     
     [data-location="global-toolbar"],
     [data-location="vertical-nav"],
-    i18n-string,
-span
-{
+    i18n-string
+    {
       color: ${p.textPrimary} !important;
     }
+    /* metergrid-Fix: das urspruengliche "span" in obigem Selektor war viel zu
+       breit - hat mit !important JEDEN <span> ueberschrieben, auch bewusst
+       hell gestylten Text auf dunklem Hintergrund (z.B. Badge-Zaehler wie
+       "35"/"7.285": weisser Text auf rgb(20,20,20)-Pille). Ergebnis: dunkel-
+       blauer statt weisser Text auf dunklem Grund - unlesbar. Betraf alle
+       Themes der Original-Extension, nicht nur metergrid. */
 
     [class*="DialogHeader__StyledHeaderInner"],
     [class*="SidebarContainer"],
