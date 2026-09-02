@@ -1275,6 +1275,22 @@ function buildElementOverridesV2(p) {
       background-color: ${p.surfaceBase} !important
 }
 
+    /* metergrid-Fix: [class*="SidebarContainer"] oben ist ein sehr breiter
+       Substring-Match und faerbt vermutlich auch ein inneres Wrapper-
+       Element INNERHALB der Vertical-Nav-Rail mit der hellen Content-
+       Farbe (surfaceBase) statt navBg - faellt bei dunklen Themes nicht
+       auf, weil dort surfaceBase ohnehin dunkel ist, sprengt aber bei
+       "metergrid dark" (helle surfaceBase, dunkle navBg) die Einheit-
+       lichkeit der Sidebar. Hoehere Spezifitaet (ID + Attribut statt nur
+       Attribut) erzwingt hier navBg, unabhaengig von der Regel-Reihen-
+       folge oben. Nur die Vorkommen INNERHALB der Rail betroffen -
+       "SidebarContainer" ausserhalb (z.B. Kontakt-Panel rechts) bleibt
+       unangetastet. */
+    #hs-vertical-nav [class*="SidebarContainer"],
+    #hs-global-toolbar [class*="SidebarContainer"] {
+      background-color: ${p.navBg} !important;
+    }
+
     [class*="InboxContainer"]{
       background-color: transparent !important;
 }
