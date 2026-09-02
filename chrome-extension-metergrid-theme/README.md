@@ -14,7 +14,8 @@ Die [Stylus-Variante](../metergrid-hubspot.user.css) dieses Projekts hatte über
    - Variablen mit ursprünglich transparentem Live-Wert (unsichtbare Link-Unterstriche, randlose Tabellen, ein Ghost-Icon) bleiben transparent statt in eine feste Farbe verwandelt zu werden.
 3. **Bug behoben:** Ein Substring-Fehltreffer (`"button-fill"` enthält zufällig die Zeichenfolge `"on-fill"` am Ende von "butt**on**" + "-fill") hätte Primär-Buttons faelschlich auf Weiß statt auf die Akzentfarbe gesetzt — für alle Themes betroffen, jetzt korrigiert.
 4. **Generische Badge/Tag/Alert-Umfärbung entfernt** (betraf alle Themes, nicht nur metergrid): Hätte auch rote Fehler-/Mahn-Badges auf die Theme-Akzentfarbe umgefärbt und damit Status-Semantik zerstört.
-5. `themes.js` (ungenutzte Altlast, nicht im Manifest referenziert) entfernt, `manifest.json` bereinigt (kein `update_url`, da lokal geladen).
+5. **Bug behoben:** Ein Selektor endete auf ein blankes `span` mit `!important` — überschrieb dadurch jeden Span auf der Seite, auch Badge-Zähler (Ticket-/Deal-Counts) und Tooltips mit bewusst hellem Text auf dunklem Hintergrund. Ergebnis: dunkler Text auf dunklem Grund, unlesbar. Betraf alle Themes der Original-Extension, nicht nur metergrid. Jetzt auf die eigentlich gemeinten, engeren Selektoren (`[data-location="global-toolbar"]`, `[data-location="vertical-nav"]`, `i18n-string`) beschränkt.
+6. `themes.js` (ungenutzte Altlast, nicht im Manifest referenziert) entfernt, `manifest.json` bereinigt (kein `update_url`, da lokal geladen).
 
 ## Installation
 
