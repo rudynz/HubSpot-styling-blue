@@ -1003,6 +1003,32 @@ function buildCssVariablesV2(p) {
 */
 function buildCssVariablesV2Extended(p) {
   return {
+    /* metergrid-Fix: bedingte Zeilenformatierung in Tabellen/Reports nutzt
+       color-mix() aus zwei dieser Variablen (per DevTools bestaetigt: z.B.
+       color-mix(in srgb, var(--trellis-color-reporting-fill-highlight-
+       purple-default), var(--trellis-color-reporting-fill-highlight-red-
+       default))). Die Original-Extension setzt diese Familie fuer KEIN
+       Theme (auch nicht die eingebauten wie Cyberpunk) - blieb bislang
+       unangetastet, um Highlight-/Chart-Semantik nicht auf die Marken-
+       farbe umzufaerben. Ganz weglassen laesst color-mix() aber offenbar
+       ins Leere greifen (undefinierte Variable), statt sauber auf
+       HubSpots eigenen Wert zurueckzufallen. Fix: feste, NICHT theme-
+       abhaengige Standardwerte (HubSpots eigene Light-Theme-Werte) statt
+       gar keine - Semantik bleibt neutral, aber color-mix() hat immer
+       etwas Gueltiges zum Rechnen. */
+    "--trellis-color-reporting-fill-highlight-blue-default": "#acdaf4",
+    "--trellis-color-reporting-fill-highlight-blue-subtle": "#e1f2fb",
+    "--trellis-color-reporting-fill-highlight-green-default": "#bde7cb",
+    "--trellis-color-reporting-fill-highlight-green-subtle": "#edf4ef",
+    "--trellis-color-reporting-fill-highlight-orange-default": "#fcc6b1",
+    "--trellis-color-reporting-fill-highlight-orange-subtle": "#fcece6",
+    "--trellis-color-reporting-fill-highlight-purple-default": "#D7CDFC",
+    "--trellis-color-reporting-fill-highlight-purple-subtle": "#EFEEFD",
+    "--trellis-color-reporting-fill-highlight-red-default": "#fcc5be",
+    "--trellis-color-reporting-fill-highlight-red-subtle": "#fcece9",
+    "--trellis-color-reporting-fill-highlight-yellow-default": "#fbe0a5",
+    "--trellis-color-reporting-fill-highlight-yellow-subtle": "#fcf6e6",
+
     "--trellis-color-border-container-default": p.borderDefault,
     "--trellis-color-border-secondary-disabled-alt": p.borderSubtle,
     "--trellis-color-fill-inverse-primary": p.interactive,
