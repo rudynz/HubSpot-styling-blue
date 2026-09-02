@@ -1388,6 +1388,25 @@ function buildElementOverridesV2(p) {
       background-color: ${p.surfaceHover} !important;
     }
 
+    /* metergrid-Fix: per Live-DOM-Inspektion (claude-in-chrome) gefunden.
+       Zwei innere <ul>-Elemente rendern eigenstaendig background-color:
+       rgb(255,255,255), unabhaengig vom (korrekt navy gefaerbten) Eltern-
+       Container - background-color vererbt sich nicht, ein Kind mit
+       eigenem Wert malt einfach druebter. Keine bestehende Regel im
+       Stylesheet sprach diese Klassen an (bestaetigt per Volltextsuche).
+         - #hs-global-toolbar-icons / GlobalToolbar__StyledToolMenu:
+           rechter Topbar-Bereich (Grid-Icon, "?", Zahnrad, Glocke,
+           Breeze-Assistent, Avatar)
+         - VerticalNavMenu__StyledUl (primary-nav-menu): mittlerer Block
+           der Rail mit den Nav-Icons */
+    #hs-global-toolbar-icons,
+    [class*="GlobalToolbar__StyledToolMenu"] {
+      background-color: ${p.navBg} !important;
+    }
+    [class*="VerticalNavMenu__StyledUl"] {
+      background-color: ${p.navBg} !important;
+    }
+
     /* =====================================================================
        metergrid-Fix: Abdeckung der AKTUELLEN HubSpot-DOM-Struktur (per
        DevTools-Inspektion des Nutzers ermittelt). HubSpots Redesign hat

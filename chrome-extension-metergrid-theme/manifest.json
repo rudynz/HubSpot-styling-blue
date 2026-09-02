@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HubSpot Theme Changer - metergrid",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "HubSpot Theme Changer mit metergrid-CI/CD-Theme und erweiterter Variablenabdeckung (fwc-* Framework Web Components).",
   "permissions": [
     "storage",
