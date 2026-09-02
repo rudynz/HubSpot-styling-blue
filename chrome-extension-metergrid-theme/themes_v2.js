@@ -27,6 +27,61 @@ const THEMES_V2_DATA = {
       }
     },
 
+    metergrid_dark: {
+      name: "metergrid dark",
+      description: "metergrid CI/CD - Topbar + Sidebar durchgehend Navy, Content bleibt hell",
+      category: "metergrid",
+      preview: { bodyBg: "#fcfdfe", headerBg: "#002c96", sidebarBg: "#002c96", cardBg: "#fcfdfe" },
+      tokens: {
+        surfaceBase: "#fcfdfe", surfaceRaised: "#fcfdfe", surfaceHover: "#f2f6fb", surfacePressed: "#005edf",
+        textPrimary: "#1e2a4a", textSecondary: "#5d7182", textDisabled: "#9ca3af", textOnFill: "#ffffff",
+        accent1: "#005edf", accent2: "#264ca6", accent3: "#5d8ae0", accent4: "#a9c3e8",
+        interactive: "#005edf", interactiveHover: "#264ca6", interactivePressed: "#002c96",
+        brand: "#005edf", brandHover: "#264ca6", brandPressed: "#002c96", brandSubtle: "#e6f0fd",
+        borderDefault: "#cfdcf0", borderSubtle: "#e6edf7", borderHover: "#a9c3e8", borderAccent: "#005edf",
+        statusAlert: "#dc2626", statusAlertHover: "#b91c1c", statusAlertPressed: "#991b1b", statusAlertSubtle: "#fef2f2", statusAlertText: "#dc2626",
+        statusPositive: "#16a34a", statusPositiveHover: "#15803d", statusPositivePressed: "#166534", statusPositiveSubtle: "#e0faf2", statusPositiveText: "#002c96",
+        statusCaution: "#ca8a04", statusCautionHover: "#a16207", statusCautionPressed: "#854d0e", statusCautionSubtle: "#fefce8", statusCautionText: "#ca8a04",
+        statusInfo: "#0284c7", statusInfoHover: "#0369a1", statusInfoPressed: "#075985", statusInfoSubtle: "#f0f9ff", statusInfoText: "#0284c7",
+        navBg: "#002c96", navIcon: "#c9d4e8", navIconHover: "#ffffff", navText: "#c9d4e8",
+        cardBg: "#fcfdfe", cardBorder: "#cfdcf0", cardHover: "#f2f6fb",
+        buttonPrimaryBg: "#005edf", buttonPrimaryText: "#ffffff", buttonSecondaryBg: "#ffffff", buttonSecondaryText: "#005edf", buttonSecondaryBorder: "#cfdcf0",
+        inputBg: "#ffffff", inputBorder: "#cfdcf0", inputFocus: "#005edf", inputText: "#1e2a4a", inputPlaceholder: "#9ca3af",
+        tableBg: "#ffffff", tableHeaderBg: "#fcfdfe", tableRowHover: "#f2f6fb", tableBorder: "#cfdcf0",
+        modalBg: "#ffffff", modalBorder: "#cfdcf0", tooltipBg: "#1e2a4a", tooltipText: "#ffffff",
+        badgeBg: "#e6f0fd", badgeText: "#002c96", progressBg: "#e6edf7", progressFill: "#005edf",
+        gradientPrimary: null, gradientAccent: null
+      }
+    },
+
+    psychedelic_lsd: {
+      name: "Psychedelic LSD 🍄🌈",
+      description: "Joke-Theme. Nicht fuer Dauerbetrieb (oder Epilepsie) geeignet.",
+      category: "joke",
+      preview: { bodyBg: "#0a0014", headerBg: "#ff00ea", sidebarBg: "#ff00ea", cardBg: "#1a0033" },
+      tokens: {
+        surfaceBase: "#0a0014", surfaceRaised: "#1a0033", surfaceHover: "#ff00ea", surfacePressed: "#00ff9f",
+        textPrimary: "#00ff9f", textSecondary: "#ff00ea", textDisabled: "#6b21a8", textOnFill: "#0a0014",
+        accent1: "#ff00ea", accent2: "#00fff9", accent3: "#faff00", accent4: "#ff5f00",
+        interactive: "#faff00", interactiveHover: "#00fff9", interactivePressed: "#ff00ea",
+        brand: "#ff5f00", brandHover: "#faff00", brandPressed: "#ff00ea", brandSubtle: "#3d0a3d",
+        borderDefault: "#00fff9", borderSubtle: "#6b21a8", borderHover: "#faff00", borderAccent: "#ff00ea",
+        statusAlert: "#ff0044", statusAlertHover: "#ff5c85", statusAlertPressed: "#c2003a", statusAlertSubtle: "#3d000f", statusAlertText: "#ff5c85",
+        statusPositive: "#00ff9f", statusPositiveHover: "#5fffc4", statusPositivePressed: "#00c47f", statusPositiveSubtle: "#003d26", statusPositiveText: "#00ff9f",
+        statusCaution: "#faff00", statusCautionHover: "#ffff66", statusCautionPressed: "#c2c200", statusCautionSubtle: "#3d3d00", statusCautionText: "#faff00",
+        statusInfo: "#00fff9", statusInfoHover: "#66fffb", statusInfoPressed: "#00c2bd", statusInfoSubtle: "#003d3b", statusInfoText: "#00fff9",
+        navBg: "#ff00ea", navIcon: "#faff00", navIconHover: "#00fff9", navText: "#0a0014",
+        cardBg: "#1a0033", cardBorder: "#ff00ea", cardHover: "#3d0a3d",
+        buttonPrimaryBg: "#faff00", buttonPrimaryText: "#0a0014", buttonSecondaryBg: "#1a0033", buttonSecondaryText: "#00fff9", buttonSecondaryBorder: "#ff00ea",
+        inputBg: "#1a0033", inputBorder: "#00fff9", inputFocus: "#faff00", inputText: "#00ff9f", inputPlaceholder: "#a21caf",
+        tableBg: "#0a0014", tableHeaderBg: "#ff00ea", tableRowHover: "#3d0a3d", tableBorder: "#00fff9",
+        modalBg: "#1a0033", modalBorder: "#ff00ea", tooltipBg: "#faff00", tooltipText: "#0a0014",
+        badgeBg: "#00fff9", badgeText: "#0a0014", progressBg: "#3d0a3d", progressFill: "#ff5f00",
+        gradientPrimary: "linear-gradient(135deg, #ff00ea 0%, #00fff9 25%, #faff00 50%, #ff5f00 75%, #00ff9f 100%)",
+        gradientAccent: "linear-gradient(90deg, #ff00ea, #00fff9, #faff00, #ff5f00, #00ff9f, #ff00ea)"
+      }
+    },
+
     // ==========================================
     // BLOCK COLOR THEMES (Dark monochromatic)
     // ==========================================
@@ -3666,7 +3721,8 @@ const THEME_CATEGORIES = {
   block: { name: "Dark", description: "Dark monochromatic themes", order: 1 },
   duo: { name: "Duo", description: "Two-tone accent themes", order: 2 },
   light: { name: "Light", description: "Bright and clean", order: 3 },
-  special: { name: "Classic", description: "Popular color schemes", order: 4 }
+  special: { name: "Classic", description: "Popular color schemes", order: 4 },
+  joke: { name: "🍄 Fun", description: "Not for daily use", order: 5 }
 };
 
 function buildAllThemes() {

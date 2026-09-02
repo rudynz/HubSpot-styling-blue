@@ -8,7 +8,10 @@ Die [Stylus-Variante](../metergrid-hubspot.user.css) dieses Projekts hatte über
 
 ## Was wurde geändert?
 
-1. **Neues Theme "metergrid"** (`themes_v2.js`, `THEMES_V2_DATA.palettes.metergrid`): helles Grundlayout wie die bestehenden `*_light`-Themes (weiße Sidebar/Topbar), Akzente (Buttons, Links, aktiver Nav-Eintrag, Fokus-Ränder) in metergrid-Navy/Blau (`#002c96` / `#005edf`).
+1. **Zwei metergrid-Themes** (Tab **metergrid**, ganz links):
+   - **metergrid** — helles Grundlayout wie die bestehenden `*_light`-Themes (weiße Sidebar/Topbar), Akzente (Buttons, Links, aktiver Nav-Eintrag, Fokus-Ränder) in metergrid-Navy/Blau (`#002c96` / `#005edf`).
+   - **metergrid dark** — identisch, aber Topbar + Sidebar durchgehend Navy (`#002c96`), Content-Bereich bleibt hell. Nutzt denselben `navBg`-Mechanismus wie die eingebauten Dark-Themes (Cyberpunk, Dracula, …) der Extension, nur eben unabhängig vom (hellen) `surfaceBase` für den Content.
+   - Bonus: **Psychedelic LSD** (Tab **🍄 Fun**) — Joke-Theme, keine Kontrast-/Nutzbarkeits-Ansprüche.
 2. **Variablen-Lücke geschlossen** (`buildCssVariablesV2Extended`): Das Original kennt nur ca. 220 `--trellis-color-*`-Variablen. HubSpots aktuelles Redesign nutzt aber eine zweite, größere Familie `--trellis-color-fwc-*` ("Framework Web Components": Buttons, Links, Inputs, Tabellen) mit eigenen Werten. Per Live-DevTools-Export ermittelt, automatisiert klassifiziert und ergänzt — funktioniert für **jedes** Theme der Extension, nicht nur metergrid.
    - Tag/Badge/Ribbon-Farben, Breeze/Copilot-Submarke, Report-Chart-/Highlight-Farben, Status-Farben (Alert/Caution/Positive/Info) bleiben unangetastet.
    - Variablen mit ursprünglich transparentem Live-Wert (unsichtbare Link-Unterstriche, randlose Tabellen, ein Ghost-Icon) bleiben transparent statt in eine feste Farbe verwandelt zu werden.
