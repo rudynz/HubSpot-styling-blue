@@ -1,8 +1,11 @@
 # HubSpot styling blue
 
-Stylus-Userstyle, das HubSpot im Corporate Design des metergrid Mieterstromportals einfärbt (Navy/Blau statt HubSpot-Standard Schwarz/Orange).
+HubSpot im Corporate Design des metergrid Mieterstromportals einfärben (Navy/Blau statt HubSpot-Standard Schwarz/Orange). Zwei Wege dazu:
 
-## Versionsverlauf
+- **[chrome-extension-metergrid-theme/](chrome-extension-metergrid-theme/)** — empfohlen. Fork der Chrome-Extension "HubSpot Theme Changer" mit eigenem metergrid-Theme. Zuverlässiger als die Stylus-Variante, weil die Extension per `MutationObserver` ihre Styles laufend gegen HubSpots dynamisch nachgeladenes CSS durchsetzt.
+- **[metergrid-hubspot.user.css](metergrid-hubspot.user.css)** — Stylus-Userstyle, siehe Versionsverlauf unten. Hatte über mehrere Runden Cascade-Timing-Probleme mit HubSpots Redesign; als Referenz/Fallback erhalten.
+
+## Versionsverlauf (Stylus-Variante)
 
 **v1:** gesamte Sidebar navy + Linktext blau gesetzt → wo die Navy-Regel nicht griff, blieb HubSpots dunkelgrauer Standardhintergrund, kombiniert mit blauem Linktext = schlechter Kontrast.
 
