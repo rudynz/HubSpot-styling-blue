@@ -940,16 +940,16 @@ function buildCssVariablesV2(p) {
     "--trellis-color-specialty-link-on-fill-disabled": p.textDisabled,
     "--trellis-color-specialty-scrim": "rgba(0, 0, 0, 0.7)",
     "--trellis-color-specialty-scrim-alt": "rgba(0, 0, 0, 0.5)",
-    /* metergrid-Fix: war urspruenglich p.surfaceBase (Content-Farbe). Das
-       trieb einen inneren Wrapper der Icon-Liste in der Sidebar, waehrend
-       der aeussere Rail-Container (per Klassen-Selektoren) navBg bekam -
-       Ergebnis: zwei verschiedene Farben in derselben Sidebar-Spalte
-       (heller Icon-Bereich oben, navy leerer Bereich darunter oder
-       umgekehrt). "global-shell" ist eindeutig chrome-/rail-spezifisch
-       (es gibt separat ein unpraefixiertes --trellis-color-fill-surface-
-       default fuer den eigentlichen Seiteninhalt) - gehoert also zu navBg,
-       nicht zu surfaceBase. */
-    "--trellis-color-global-shell-fill-surface-default": p.navBg,
+    /* ACHTUNG, REVERTIERT: Ein frueherer metergrid-Fix hatte diese Variable
+       auf p.navBg umgestellt in der Annahme, "fill-surface" sei der Rail-
+       Hintergrund. Per DevTools bestaetigt ist das FALSCH: HubSpots eigene
+       Regel  #hs-nav-v4 nav, #hs-nav-v4 div, ... { color: var(--trellis-
+       color-global-shell-fill-surface-default) }  nutzt sie als TEXT-Farbe
+       der Nav-Elemente. Auf navBg gemappt wird Nav-Text = Nav-Hintergrund
+       = unsichtbar (bei jedem Theme, dessen navBg sich von der alten
+       Textfarbe unterscheidet). Muss beim Original (p.surfaceBase)
+       bleiben. */
+    "--trellis-color-global-shell-fill-surface-default": p.surfaceBase,
     "--trellis-color-global-shell-fill-surface-panel-default": p.navBg,
     "--trellis-color-global-shell-fill-nav-item-default": "transparent",
     "--trellis-color-global-shell-fill-nav-item-hover": p.surfaceHover,
@@ -1253,11 +1253,24 @@ function buildElementOverridesV2(p) {
       fill: ${p.navIcon} !important;
     }
     
+    /* metergrid-Fix: data-location-Elemente sitzen per Definition IN der
+       Nav/Toolbar - ihre Textfarbe muss navText sein, nicht textPrimary.
+       Bei den eingebauten Dark-Themes fiel der Unterschied nie auf, weil
+       dort textPrimary ohnehin hell ist; bei metergrid dark (heller
+       Content -> dunkles textPrimary) ergab das dunklen Text auf navy. */
     [data-location="global-toolbar"],
-    [data-location="vertical-nav"],
+    [data-location="vertical-nav"]
+    {
+      color: ${p.navText} !important;
+    }
     i18n-string
     {
       color: ${p.textPrimary} !important;
+    }
+    #hs-vertical-nav i18n-string,
+    #hs-global-toolbar i18n-string
+    {
+      color: ${p.navText} !important;
     }
     /* metergrid-Fix: das urspruengliche "span" in obigem Selektor war viel zu
        breit - hat mit !important JEDEN <span> ueberschrieben, auch bewusst
@@ -1373,6 +1386,50 @@ function buildElementOverridesV2(p) {
     [class*="GlobalToolbarItem__StyledListItem"] > button:hover,
     [class*="GlobalToolbarItem__StyledListItem"] > a:hover {
       background-color: ${p.surfaceHover} !important;
+    }
+
+    /* =====================================================================
+       metergrid-Fix: Abdeckung der AKTUELLEN HubSpot-DOM-Struktur (per
+       DevTools-Inspektion des Nutzers ermittelt). HubSpots Redesign hat
+       Wrapper umbenannt/ergaenzt, die die Original-Extension nicht kennt.
+       Bei den eingebauten Dark-Themes unsichtbar, weil deren Content-
+       Farben ohnehin dunkel sind - bei metergrid dark (helle Content-
+       Farben + dunkle Chrome) erscheinen sie als helle Bloecke im Navy.
+       ===================================================================== */
+
+    /* Wrapper-Roots der gesamten Chrome (Topbar + Rail) */
+    #hs-global-toolbar-root,
+    #hs-vertical-nav-root,
+    #hs-one-nav-root {
+      background-color: ${p.navBg} !important;
+    }
+
+    /* Scroll-Pfeile oben/unten in der Rail: neuer Klassenname
+       (ScrollArrow__StyledScrollArrow statt frueher
+       VerticalNavContainer__StyledScrollArrow). Brauchen OPAK navBg,
+       weil scrollender Inhalt darunter durchlaeuft. */
+    #hs-vertical-nav [class*="ScrollArrow__StyledScrollArrow"] {
+      background-color: ${p.navBg} !important;
+    }
+
+    /* Scroll-Container in der Rail: transparent, damit navBg der Rail
+       durchscheint (ScrollablePane__* sind generische Komponenten, daher
+       nur innerhalb der Rail anfassen) */
+    #hs-vertical-nav [class*="ScrollablePane"],
+    #hs-vertical-nav [class*="DropZone"] {
+      background-color: transparent !important;
+    }
+
+    /* Weisse Voll-Hoehen-Slabs in der Topbar (im Background-Audit als
+       rgb(255,255,255) @ voller Toolbar-Hoehe identifiziert): der Wrapper
+       um das Suchfeld und der um den "+"-Button. Beim hellen Theme
+       unsichtbar (weiss auf weiss), bei metergrid dark weisse Kloetze
+       im Navy. Wrapper transparent - das Suchfeld selbst (form) behaelt
+       sein inputBg. */
+    #hs-global-toolbar [class*="SearchInputWrapper"],
+    [class*="GlobalToolbar__SearchAndPlusCreateWrapper"],
+    [class*="ObjectCreateButton__ObjectCreateButtonWrapper"] {
+      background-color: transparent !important;
     }
     
     /* CARDS */
