@@ -940,7 +940,16 @@ function buildCssVariablesV2(p) {
     "--trellis-color-specialty-link-on-fill-disabled": p.textDisabled,
     "--trellis-color-specialty-scrim": "rgba(0, 0, 0, 0.7)",
     "--trellis-color-specialty-scrim-alt": "rgba(0, 0, 0, 0.5)",
-    "--trellis-color-global-shell-fill-surface-default": p.surfaceBase,
+    /* metergrid-Fix: war urspruenglich p.surfaceBase (Content-Farbe). Das
+       trieb einen inneren Wrapper der Icon-Liste in der Sidebar, waehrend
+       der aeussere Rail-Container (per Klassen-Selektoren) navBg bekam -
+       Ergebnis: zwei verschiedene Farben in derselben Sidebar-Spalte
+       (heller Icon-Bereich oben, navy leerer Bereich darunter oder
+       umgekehrt). "global-shell" ist eindeutig chrome-/rail-spezifisch
+       (es gibt separat ein unpraefixiertes --trellis-color-fill-surface-
+       default fuer den eigentlichen Seiteninhalt) - gehoert also zu navBg,
+       nicht zu surfaceBase. */
+    "--trellis-color-global-shell-fill-surface-default": p.navBg,
     "--trellis-color-global-shell-fill-surface-panel-default": p.navBg,
     "--trellis-color-global-shell-fill-nav-item-default": "transparent",
     "--trellis-color-global-shell-fill-nav-item-hover": p.surfaceHover,
